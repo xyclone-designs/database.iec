@@ -1,2 +1,2 @@
 # database.iec
-Program to create a sqlite database from downloaded South African IEC results data
+ IEC election results database built from data supplied by the IEC
