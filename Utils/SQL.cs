@@ -62,7 +62,7 @@ namespace DataProcessor.Utils
 
             return party is not null;
         }
-        public static bool ReportVotingDistrict(int votingDistrictId, SQLiteConnection sqliteConnection, StreamWriter? streamWriterErrors)
+        public static bool ReportVotingDistrict(string votingDistrictId, SQLiteConnection sqliteConnection, StreamWriter? streamWriterErrors)
         {
             VotingDistrict? votingDistrict = sqliteConnection.Find<VotingDistrict>(votingDistrict => votingDistrict.id == votingDistrictId);
 
@@ -75,7 +75,7 @@ namespace DataProcessor.Utils
 
             return votingDistrict is not null;
         }
-        public static bool ReportWard(int wardId, SQLiteConnection sqliteConnection, StreamWriter? streamWriterErrors)
+        public static bool ReportWard(string wardId, SQLiteConnection sqliteConnection, StreamWriter? streamWriterErrors)
         {
             Ward? ward = sqliteConnection.Find<Ward>(ward => ward.id == wardId);
 

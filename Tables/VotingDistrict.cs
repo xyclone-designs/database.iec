@@ -8,6 +8,6 @@ namespace DataProcessor.Tables
         public int? pkProvince { get; set; }
         public int? pkWard { get; set; }
         [SQLite.Unique]
-        public int? id { get; set; }
+        public string? id { get; set; }
     }
 }

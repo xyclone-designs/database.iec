@@ -25,7 +25,7 @@ namespace DataProcessor.CSVs
             MunicipalityGeo = Utils.RowToMunicipalityGeo(rows[1]);
             MunicipalityName = Utils.RowToMunicipalityName(rows[1]);
             WardId = Utils.RowToWard(rows[2]);
-            VotingDistrictId = Utils.RowToInt(rows[3]);
+            VotingDistrictId = Utils.RowToString(rows[3]);
             VotingStation = Utils.RowToString(rows[4]);
             RegisteredVoters = Utils.RowToInt(rows[5]);
             BallotType = Utils.RowToBallotType(rows[6]);

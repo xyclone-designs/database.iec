@@ -102,7 +102,7 @@ namespace DataProcessor
 
                     _ => null
 
-                } is int ward && Wards.Any(_ward =>
+                } is string ward && Wards.Any(_ward =>
                 {
                     return _ward.id == ward;
 

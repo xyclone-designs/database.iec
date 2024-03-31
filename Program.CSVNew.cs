@@ -101,7 +101,7 @@ namespace DataProcessor
             Console.WriteLine("VotingDistricts - Retrieving...");
             List<VotingDistrict> votingdistricts = rows
                 .Select(row => row.VotingDistrictId)
-                .OfType<int>()
+                .OfType<string>()
                 .Distinct()
                 .Where(id => sqliteConnection.Table<VotingDistrict>().Any(_ => _.id == id) is false)
                 .Select(id => new VotingDistrict
@@ -113,7 +113,7 @@ namespace DataProcessor
             log.WriteLine("VotingDistricts - Inserting Ids");
             Console.WriteLine("VotingDistricts - Inserting...");
             sqliteConnection.InsertAll(votingdistricts);
-            foreach (VotingDistrict votingdistrict in votingdistricts) log.WriteLine(votingdistrict.id ?? -1);
+            foreach (VotingDistrict votingdistrict in votingdistricts) log.WriteLine(votingdistrict.id ?? "null");
 
             return votingdistricts;
         }
@@ -127,9 +127,9 @@ namespace DataProcessor
                     true when row is CSVRowLGE csvrowlge => csvrowlge.WardId,
                     true when row is CSVRowNPE2 csvrownpe2 => csvrownpe2.WardId,
 
-                    _ => new int?()
+                    _ => null
 
-                }).OfType<int>().Distinct().Where(id =>
+                }).OfType<string>().Distinct().Where(id =>
                 {
                     return sqliteConnection
                         .Table<Ward>()
@@ -144,7 +144,7 @@ namespace DataProcessor
             log.WriteLine("Wards - Inserting Ids");
             Console.WriteLine("Wards - Inserting...");
             sqliteConnection.InsertAll(wards);
-            foreach (Ward ward in wards) log.WriteLine(ward.id ?? -1);
+            foreach (Ward ward in wards) log.WriteLine(ward.id ?? "null");
 
             return wards;
         }

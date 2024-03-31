@@ -396,7 +396,7 @@ namespace DataProcessor
             dbfilestream.CopyTo(dbziparchivedbstream);
         }
 
-        public static bool ChangeBallot<TCSVRow>(TCSVRow row, Ballot? ballot, int? votingdistrictid, int? wardid, string? municipalityvalue) where TCSVRow : CSVRow
+        public static bool ChangeBallot<TCSVRow>(TCSVRow row, Ballot? ballot, string? votingdistrictid, string? wardid, string? municipalityvalue) where TCSVRow : CSVRow
         {
             if (ballot is null) return true;
 
@@ -416,7 +416,7 @@ namespace DataProcessor
             change =
                 (votingdistrictid is null && row.VotingDistrictId is not null) ||
                 (votingdistrictid is not null && row.VotingDistrictId is null) ||
-                (votingdistrictid != row.VotingDistrictId);
+                (Equals(votingdistrictid, row.VotingDistrictId) is false);
 
             if (change) return change;
 
@@ -424,12 +424,12 @@ namespace DataProcessor
                 change =
                     (wardid is null && csvrowlge.WardId is not null) ||
                     (wardid is not null && csvrowlge.WardId is null) ||
-                    (wardid != csvrowlge.WardId);
+                    (Equals(wardid, csvrowlge.WardId) is false);
             else if (csvrownpe2 is not null)
                 change =
                     (wardid is null && csvrownpe2.WardId is not null) ||
                     (wardid is not null && csvrownpe2.WardId is null) ||
-                    (wardid != csvrownpe2.WardId);
+                    (Equals(wardid, csvrownpe2.WardId) is false);
 
             if (change) return change;
 
@@ -511,7 +511,7 @@ namespace DataProcessor
                     if (currentBallot?.pkElectoralEvent is not null)
                         ballots.Add(currentBallot);
 
-                    if (rowsorderedenumerator.Current.GetWardId() is not int wardid)
+                    if (rowsorderedenumerator.Current.GetWardId() is not string wardid)
                         currentWard = null;
                     else if (currentWard is null || currentWard.id != wardid)
                     {
@@ -578,10 +578,12 @@ namespace DataProcessor
                     {
                         currentWard.pkMunicipality ??= currentMunicipality?.pk;
                         currentWard.pkProvince ??= rowsorderedenumerator.Current.ProvincePk;
+                        currentWard.list_pkVotingDistrict = Utils.CSV.AddPKIfUnique(currentWard.list_pkVotingDistrict, currentVotingDistrict?.pk);
                     }
                     if (currentMunicipality is not null)
                     {
                         currentMunicipality.pkProvince ??= rowsorderedenumerator.Current.ProvincePk;
+                        currentMunicipality.list_pkWard = Utils.CSV.AddPKIfUnique(currentMunicipality.list_pkWard, currentWard?.pk);
                     }           
 
                     currentBallot = rowsorderedenumerator.Current.AsBallot(ballot =>

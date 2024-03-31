@@ -27,10 +27,10 @@ namespace DataProcessor.CSVs
         public string? PartyName { get; set; }
         public int? RegisteredVoters { get; set; }
         public int? SpoiltVotes { get; set; }
-        public int? VotingDistrictId { get; set; }
+        public string? VotingDistrictId { get; set; }
         
         public virtual string? GetBallotType() { return null; }
-        public virtual int? GetWardId() { return null; }
+        public virtual string? GetWardId() { return null; }
         public virtual int? GetTotalVotes() { return null; }
         
         public Ballot AsBallot(Action<Ballot>? oninit = null) 
@@ -630,11 +630,11 @@ namespace DataProcessor.CSVs
             {
                 return Clean(row);
             }
-            public static int? RowToWard(string row)
+            public static string? RowToWard(string row)
             {
                 row = row.Replace("Ward", string.Empty);
                 
-                return RowToInt(row);
+                return RowToString(row);
             }
         }
     }

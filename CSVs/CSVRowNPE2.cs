@@ -30,7 +30,7 @@ namespace DataProcessor.CSVs
             MunicipalityGeo = Utils.RowToMunicipalityGeo(rows[2]);
             MunicipalityName = Utils.RowToMunicipalityName(rows[2]);
             WardId = Utils.RowToWard(rows[3]);
-            VotingDistrictId = Utils.RowToInt(rows[4]);
+            VotingDistrictId = Utils.RowToString(rows[4]);
             VotingStation = Utils.RowToString(rows[4]);
             PartyName = Utils.RowToPartyName(rows[5]);
             RegisteredVoters = Utils.RowToInt(rows[6]);
@@ -43,11 +43,11 @@ namespace DataProcessor.CSVs
         }
 
         public string? VotingStation { get; set; }
-        public int? WardId { get; set; }
+        public string? WardId { get; set; }
         public int? Section24AVotes { get; set; }
         public int? SpecialVotes { get; set; }
 
-        public override int? GetWardId()
+        public override string? GetWardId()
         {
             return WardId ?? base.GetWardId();
         }

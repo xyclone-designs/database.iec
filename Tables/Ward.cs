@@ -6,7 +6,8 @@ namespace DataProcessor.Tables
     {
         public int? pkMunicipality { get; set; }
         public int? pkProvince { get; set; }
+        public string? list_pkVotingDistrict { get; set; }
         [SQLite.Unique]
-        public int? id { get; set; }
+        public string? id { get; set; }
     }
 }

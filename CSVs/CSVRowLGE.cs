@@ -9,13 +9,13 @@ namespace DataProcessor.CSVs
 
         public string? VotingStation { get; set; }
         public string? BallotType { get; set; }
-        public int? WardId { get; set; }
+        public string? WardId { get; set; }
 
         public override string? GetBallotType()
         {
             return BallotType ?? base.GetBallotType();
         }
-        public override int? GetWardId()
+        public override string? GetWardId()
         {
             return WardId ?? base.GetWardId();
         }
