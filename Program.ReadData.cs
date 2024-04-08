@@ -1,4 +1,5 @@
-﻿using DataProcessor.Tables;
+﻿using DataProcessor.CSVs;
+using DataProcessor.Tables;
 using Newtonsoft.Json.Linq;
 using SQLite;
 using System;
@@ -43,6 +44,7 @@ namespace DataProcessor
 
                 sqliteConnection.Insert(new ElectoralEvent
                 {
+                    pk = CSVRow.Utils.RowToElectoralEvent(grouped.First()[0]) ?? throw new Exception(),
                     date = grouped.First()[1],
                     type = ElectoralEvent.Type(grouped.Key),
                     list_pkParty_designation_nationalAllocation = ElectoralEvent.IsNational(grouped.Key) ? string.Join(',', allocations) : null,
