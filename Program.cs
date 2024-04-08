@@ -665,12 +665,6 @@ namespace DataProcessor
 
             #endregion
 
-            using Stream logziparchivedbstream = iecziparchive.CreateEntry(logname).Open();
-            logfilestream.CopyTo(logziparchivedbstream);
-            logfilestream.Close();
-            logziparchivedbstream.Close();
-            File.Delete(logpath);
-
             sqliteConnection.Close();
 
             using FileStream dbfilestream = File.OpenRead(dbpath);
