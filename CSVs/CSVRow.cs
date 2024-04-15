@@ -636,6 +636,24 @@ namespace DataProcessor.CSVs
                 
                 return RowToString(row);
             }
+
+            public static string ProvincePkToId(int pk)
+            {
+                return pk switch
+                {
+                    1 => "EC",
+                    2 => "FS",
+                    3 => "GT",
+                    4 => "KZN",
+                    5 => "LIM",
+                    6 => "MP",
+                    7 => "NW",
+                    8 => "NC",
+                    9 => "WC",
+
+                    _ => throw new Exception(string.Format("Province pk what {0} ???", pk))
+                };
+            }
         }
     }
 }

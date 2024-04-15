@@ -85,6 +85,32 @@ namespace DataProcessor.Tables
             else votesSpoilt += ballot.votesSpoilt ?? 0;
             if (votesTotal is null) votesTotal = ballot.votesTotal;
             else votesTotal += ballot.votesTotal ?? 0;
+            if (votesValid is null) votesValid = ballot.votesValid;
+            else votesValid += ballot.votesValid ?? 0;
+
+            UpdatePartyVotes(ballot.list_pkParty_votes);
+        }
+        public void UpdatePartyVotes(string? listPkPartyVotes)
+        {
+            if (list_pkParty_votes is null) list_pkParty_votes = listPkPartyVotes;
+            else if (listPkPartyVotes is not null)
+            {
+                Dictionary<int, long> pairs = list_pkParty_votes
+                    .Split(",")
+                    .Select(_pkPair => _pkPair.Split(":"))
+                    .ToDictionary(_pkPair => int.Parse(_pkPair[0]), _pkPair => long.Parse(_pkPair[1]));
+
+                foreach (string[] pkVote in listPkPartyVotes
+                    .Split(",")
+                    .Select(_pkVote => _pkVote.Split(":")))
+                {
+                    int pk = int.Parse(pkVote[0]);
+                    pairs.TryAdd(pk, 0);
+                    pairs[pk] += long.Parse(pkVote[1]);
+                }
+
+                list_pkParty_votes = string.Join(',', pairs.Select(pair => string.Format("{0}:{1}", pair.Key, pair.Value)));
+            }
         }
     }
 }

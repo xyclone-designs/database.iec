@@ -652,13 +652,23 @@ namespace DataProcessor
                 sqliteconnectionelectoralevent.Close();
 
                 using FileStream dbelectoraleventfilestream = File.OpenRead(dbelectoraleventpath);
-                using Stream dbzipelectoraleventfilestream = iecziparchive
+                using Stream dbelectoraleventarchivestream = iecziparchive
                     .CreateEntry(dbelectoraleventfilename)
                     .Open();
-
-                dbelectoraleventfilestream.CopyTo(dbzipelectoraleventfilestream);
+                dbelectoraleventfilestream.CopyTo(dbelectoraleventarchivestream);
                 dbelectoraleventfilestream.Close();
+                dbelectoraleventarchivestream.Close();
 
+                string dbzip = ZipFile(dbelectoraleventpath);
+                using FileStream dbzipfilestream = File.OpenRead(dbzip);
+                using Stream dbziparchivestream = iecziparchive
+                    .CreateEntry(dbzip.Split("\\").Last())
+                    .Open();
+                dbzipfilestream.CopyTo(dbziparchivestream);
+                dbzipfilestream.Close();
+                dbziparchivestream.Close();
+
+                File.Delete(dbzip);
                 File.Delete(dbelectoraleventpath);
                 File.Delete(txtelectoraleventpath);
             }
@@ -667,11 +677,21 @@ namespace DataProcessor
 
             sqliteConnection.Close();
 
+            logfilestream.Close();
+            using FileStream logstream = File.Open(logpath, FileMode.OpenOrCreate);
+            using Stream logziparchivedbstream = iecziparchive.CreateEntry(logname).Open();
+            logstream.CopyTo(logziparchivedbstream);
+            logstream.Close();
+            logziparchivedbstream.Close();
+
             using FileStream dbfilestream = File.OpenRead(dbpath);
             using Stream dbziparchivedbstream = iecziparchive.CreateEntry(dbname).Open();
             dbfilestream.CopyTo(dbziparchivedbstream);
             dbfilestream.Close();
+            dbziparchivedbstream.Close();
+
             File.Delete(dbpath);
+            File.Delete(logpath);
         }
 
         public static SQLiteConnection SQLiteConnection(string path, bool individual)
@@ -701,6 +721,23 @@ namespace DataProcessor
 
             return sqliteconnection;
 
+        }
+        public static string ZipFile(string filepath)
+        {
+            string name = filepath.Split("\\").Last();
+            string zipfilepath = filepath + ".zip";
+
+            using FileStream filestream = File.OpenRead(filepath);
+            using FileStream filestreamzip = File.Create(zipfilepath);
+            using ZipArchive ziparchive = new(filestreamzip, ZipArchiveMode.Create, true);
+            using Stream stream = ziparchive
+                .CreateEntry(name)
+                .Open();
+
+            filestream.CopyTo(stream);
+            filestream.Close();
+
+            return zipfilepath;
         }
         public static void PksToText(string path, CSVParameters parameters)
         {
@@ -837,26 +874,15 @@ namespace DataProcessor
             IEnumerable<TCSVRow> rows,
             CSVParameters parameters) where TCSVRow : CSVRow
         {
-            string[] electoralEventBallotsKeys = [string.Empty];
-            Dictionary<int, int> electoralEventBallotPkPartyVotes = [];
-            Dictionary<string, Ballot> electoralEventBallots = new()
-            {
-                { electoralEventBallotsKeys[0], new Ballot
-                {
-                    pkElectoralEvent = electoralEvent.pk,
-                    type = electoralEvent.type,
-                } }
-            };
-            electoralEventBallots[string.Empty] = sqliteConnection.CreateAndAdd(electoralEventBallots[string.Empty]);
-            electoralEvent.list_pkBallot = Utils.CSV.AddPKIfUnique(electoralEvent.list_pkBallot, electoralEventBallots[string.Empty].pk);
-
             parameters.Ballots = [];
+            parameters.BallotsElectoralEvent = [];
             parameters.Parties ??= [];
             parameters.Provinces ??= [];
             parameters.VotingDistricts ??= [];
             parameters.Wards ??= [];
             parameters.Municipalities ??= [];
 
+            Ballot? electoralEventBallot = null;
             Ballot? currentBallot = null;
             VotingDistrict? currentVotingDistrict = null;
             Province? currentProvince = null;
@@ -886,7 +912,10 @@ namespace DataProcessor
                     typeof(TCSVRow) == typeof(NPE1999) ? currentMunicipality?.name : currentMunicipality?.geoCode))
                 {
                     if (currentBallot?.pkElectoralEvent is not null)
+                    {
                         parameters.Ballots.Add(currentBallot);
+                        electoralEventBallot?.UpdateBallot(currentBallot);
+                    }
 
                     if (rowsorderedenumerator.Current.GetWardId() is not string wardid)
                         currentWard = null;
@@ -957,7 +986,6 @@ namespace DataProcessor
                             }
                         }
                     }
-
                     if (currentVotingDistrict is not null)
                     {
                         currentVotingDistrict.pkWard ??= currentWard?.pk;
@@ -974,61 +1002,26 @@ namespace DataProcessor
                     {
                         currentMunicipality.pkProvince ??= rowsorderedenumerator.Current.ProvincePk;
                         currentMunicipality.list_pkWard = Utils.CSV.AddPKIfUnique(currentMunicipality.list_pkWard, currentWard?.pk);
-                    }           
+                    }
 
                     currentBallot = rowsorderedenumerator.Current.AsBallot(ballot =>
                     {
-                        ballot.pkElectoralEvent = typeof(TCSVRow) == typeof(NE1994) || typeof(TCSVRow) == typeof(PE1994) ? null : electoralEvent.pk;
-                        ballot.pkProvince = currentProvince?.pk ?? rowsorderedenumerator.Current.ProvincePk;
-                        ballot.pkMunicipality = currentMunicipality?.pk;
-                        ballot.pkWard = currentWard?.pk;
-                        ballot.pkVotingDistrict = currentVotingDistrict?.pk;
+                        ballot.pkElectoralEvent ??= electoralEvent.pk;
+                        ballot.pkProvince ??= currentProvince?.pk ?? rowsorderedenumerator.Current.ProvincePk;
+                        ballot.pkMunicipality ??= currentMunicipality?.pk;
+                        ballot.pkWard ??= currentWard?.pk;
+                        ballot.pkVotingDistrict ??= currentVotingDistrict?.pk;
                     });
-
-                    switch (true)
+                    electoralEventBallot ??= rowsorderedenumerator.Current.AsBallot(ballot =>
                     {
-                        case true when currentBallot.type is null:
-                        case true when currentBallot.pkProvince is null:
-                            break;
-
-                        case true when (currentBallot.type == ElectoralEvent.Types.National || currentBallot.type == ElectoralEvent.Types.Provincial) &&
-                            sqliteConnection.Find<Province>(currentBallot.pkProvince.Value) is Province province &&
-                            string.Format("{0}.{1}", currentBallot.type, province.id) is string type:
-                            {
-                                electoralEventBallotsKeys = [string.Empty, type];
-                                if (electoralEventBallots.ContainsKey(type) is false)
-                                {
-                                    electoralEventBallots.Add(type, rowsorderedenumerator.Current.AsBallot(ballot => ballot.type = type));
-                                    electoralEventBallots[type].UpdateBallot(currentBallot);
-                                    electoralEventBallots[type] = sqliteConnection.CreateAndAdd(electoralEventBallots[type]);
-                                    electoralEvent.list_pkBallot = Utils.CSV.AddPKIfUnique(electoralEvent.list_pkBallot, electoralEventBallots[type].pk);
-                                }
-
-                            }
-                            break;
-
-                        case true when
-                            currentBallot.type.Split('.') is string[] typesplit &&
-                            typesplit.Length == 2 &&
-                            typesplit[0] == ElectoralEvent.Types.Municipal &&
-                            electoralEventBallots.ContainsKey(currentBallot.type) is false:
-                            {
-                                electoralEventBallotsKeys = [string.Empty, currentBallot.type];
-                                electoralEventBallots.Add(currentBallot.type, rowsorderedenumerator.Current.AsBallot(ballot => ballot.pkProvince = null));
-                                electoralEventBallots[currentBallot.type].UpdateBallot(currentBallot);
-                                electoralEventBallots[currentBallot.type] = sqliteConnection.CreateAndAdd(electoralEventBallots[currentBallot.type]);
-                                electoralEvent.list_pkBallot = Utils.CSV.AddPKIfUnique(electoralEvent.list_pkBallot, electoralEventBallots[currentBallot.type].pk);
-
-                            }
-                            break;
-
-                        default: break;
-                    }
-
-                    electoralEvent.list_pkBallot = Utils.CSV.AddPKIfUnique(electoralEvent.list_pkBallot, electoralEventBallots[string.Empty].pk);
-                    foreach (string electoralEventBallotsKey in electoralEventBallotsKeys)
-                        if (electoralEventBallots.ContainsKey(electoralEventBallotsKey))
-                            electoralEventBallots[electoralEventBallotsKey].UpdateBallot(currentBallot);
+                        ballot.pkElectoralEvent = electoralEvent.pk;
+                        ballot.pkProvince = null;
+                        ballot.pkMunicipality = null;
+                        ballot.pkWard = null;
+                        ballot.pkVotingDistrict = null;
+                        if (electoralEvent.type?.Contains(ElectoralEvent.Types.Municipal) ?? false)
+                            ballot.type = ElectoralEvent.Types.Municipal;
+                    });
                 }
 
                 if (rowsorderedenumerator.Current.PartyName is null)
@@ -1045,30 +1038,64 @@ namespace DataProcessor
                 }
 
                 if (currentParty is not null && rowsorderedenumerator.Current.PartyVotes.HasValue)
-                {
-                    if (electoralEventBallotPkPartyVotes.ContainsKey(currentParty.pk))
-                        electoralEventBallotPkPartyVotes[currentParty.pk] += rowsorderedenumerator.Current.PartyVotes.Value;
-                    else electoralEventBallotPkPartyVotes.Add(currentParty.pk, rowsorderedenumerator.Current.PartyVotes.Value);
-
-                    currentBallot.list_pkParty_votes = 
-                            Utils.CSV.AddPKPairIfUnique(currentBallot.list_pkParty_votes, currentParty.pk, rowsorderedenumerator.Current.PartyVotes.Value);
-
-                    foreach (string electoralEventBallotsKey in electoralEventBallotsKeys)
-                        if (electoralEventBallots.ContainsKey(electoralEventBallotsKey))
-                            electoralEventBallots[electoralEventBallotsKey].list_pkParty_votes = Utils.CSV.AddPKPairIfUnique(
-                                electoralEventBallots[electoralEventBallotsKey].list_pkParty_votes,
-                                currentParty.pk,
-                                rowsorderedenumerator.Current.PartyVotes.Value,
-                                true);
-                }
+                    currentBallot.list_pkParty_votes = Utils.CSV
+                        .AddPKPairIfUnique(currentBallot.list_pkParty_votes, currentParty.pk, rowsorderedenumerator.Current.PartyVotes.Value);
             }
 
-            parameters.ElectoralEvents?.Add(electoralEvent);
-            parameters.Ballots.AddRange(electoralEventBallots.Values);
-            if (currentBallot?.pkElectoralEvent is not null) parameters.Ballots.Add(currentBallot);
+            if (currentBallot?.pkElectoralEvent is not null) 
+                parameters.Ballots.Add(currentBallot);
+
+            Console.WriteLine("Inserting Event Ballots");
+
+            if (electoralEventBallot is not null)
+            {
+                electoralEventBallot = sqliteConnection.CreateAndAdd(electoralEventBallot);
+                parameters.BallotsElectoralEvent.Add(electoralEventBallot);
+                electoralEvent.list_pkBallot = Utils.CSV.AddPKIfUnique(electoralEvent.list_pkBallot, electoralEventBallot.pk);
+            }
+
+            foreach (Ballot eventballot in parameters.Ballots
+                .Where(_ballot => string.IsNullOrWhiteSpace(_ballot.type) is false && _ballot.pkProvince.HasValue)
+                .GroupBy(_ballot =>
+                {
+                    return
+                        _ballot.type!.Split('.') is string[] typesplit &&
+                        typesplit.Length == 2 &&
+                        typesplit[0] == ElectoralEvent.Types.Municipal
+                            ? _ballot.type
+                            : string.Format("{0}.{1}", _ballot.type, CSVRow.Utils.ProvincePkToId(_ballot.pkProvince!.Value));
+                })
+                .Where(groupedballot => groupedballot.Any())
+                .Select(groupedballot =>
+                {
+                    bool ismunicipal = groupedballot.Key.Contains(ElectoralEvent.Types.Municipal, StringComparison.OrdinalIgnoreCase);
+                    Ballot _eventballot = new()
+                    {
+                        type = groupedballot.Key,
+                    };
+                    
+                    foreach (Ballot ballot in groupedballot)
+                    {
+                        _eventballot.UpdateBallot(ballot);
+                        _eventballot.pkElectoralEvent ??= ballot.pkElectoralEvent;
+                        _eventballot.pkProvince ??= ismunicipal ? null : ballot.pkProvince;
+                    }
+                    
+                    electoralEventBallot?.UpdatePartyVotes(_eventballot.list_pkParty_votes);
+
+                    return _eventballot;
+                })) 
+            {
+                Ballot added = sqliteConnection.CreateAndAdd(eventballot);
+                parameters.BallotsElectoralEvent.Add(added);
+                electoralEvent.list_pkBallot = Utils.CSV.AddPKIfUnique(electoralEvent.list_pkBallot, added.pk);
+            }
+
+            sqliteConnection.Update(electoralEventBallot);
 
             Console.WriteLine("Inserting Ballots");
-            int ballotsAdded = sqliteConnection.InsertAll(parameters.Ballots);
+            if (electoralEvent.pk != 1 && electoralEvent.pk != 2)
+                sqliteConnection.InsertAll(parameters.Ballots);
             Console.WriteLine("Updating Provinces");
             sqliteConnection.UpdateAll(parameters.Provinces);
             Console.WriteLine("Updating Municipalities");
@@ -1083,13 +1110,14 @@ namespace DataProcessor
             sqliteConnection.UpdateAll(parameters.Parties);
             Console.WriteLine("Updating ElectoralEvent");
             sqliteConnection.Update(electoralEvent);
-            foreach (Ballot electoralEventBallot in electoralEventBallots.Values)
-                sqliteConnection.Update(electoralEventBallot);
+
+            parameters.ElectoralEvents?.Add(electoralEvent);
         }
 
         public class CSVParameters
         {
             public List<Ballot>? Ballots { get; set; }
+            public List<Ballot>? BallotsElectoralEvent { get; set; }
             public List<BallotIndividual>? BallotsIndividual { get; set; }
             public List<ElectoralEvent>? ElectoralEvents { get; set; }
             public List<ElectoralEventIndividual>? ElectoralEventsIndividual { get; set; }
