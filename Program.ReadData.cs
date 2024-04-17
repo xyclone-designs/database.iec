@@ -63,6 +63,7 @@ namespace DataProcessor
 
                 try
                 {
+                    throw new Exception();
                     log.WriteLine("Querying municipalities at '{0}'", uri);
                     Console.WriteLine("Querying municipalities at '{0}'", uri);
                     using HttpRequestMessage request = new(HttpMethod.Get, uri);
@@ -96,6 +97,7 @@ namespace DataProcessor
 
                 try
                 {
+                    throw new Exception();
                     log.WriteLine("Querying municipalities at '{0}'", uri);
                     Console.WriteLine("Querying municipalities at '{0}'", uri);
                     using HttpRequestMessage request = new(HttpMethod.Get, uri);

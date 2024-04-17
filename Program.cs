@@ -1066,29 +1066,59 @@ namespace DataProcessor
                             : string.Format("{0}.{1}", _ballot.type, CSVRow.Utils.ProvincePkToId(_ballot.pkProvince!.Value));
                 })
                 .Where(groupedballot => groupedballot.Any())
-                .Select(groupedballot =>
+                .SelectMany(groupedballot =>
                 {
+                    IEnumerable<Ballot> ballots = Enumerable.Empty<Ballot>();
                     bool ismunicipal = groupedballot.Key.Contains(ElectoralEvent.Types.Municipal, StringComparison.OrdinalIgnoreCase);
-                    Ballot _eventballot = new()
+                    Ballot _eventballot = new() { type = groupedballot.Key, };
+                    Ballot? _municipalityballot = null; 
+
+                    foreach (Ballot ballot in groupedballot.OrderBy(_ => _.pkProvince).ThenBy(_ => _.pkMunicipality))
                     {
-                        type = groupedballot.Key,
-                    };
-                    
-                    foreach (Ballot ballot in groupedballot)
-                    {
+                        if (ismunicipal)
+                        {
+                            if (_municipalityballot is null ||
+                                (ballot.pkMunicipality is not null && _municipalityballot.pkMunicipality is null) ||
+                                (ballot.pkMunicipality is null && _municipalityballot.pkMunicipality is not null) ||
+                                (
+                                    ballot.pkMunicipality is not null &&
+                                    _municipalityballot.pkMunicipality is not null &&
+                                    _municipalityballot.pkMunicipality.Value != ballot.pkMunicipality.Value
+
+                                ))
+                            {
+                                if (_municipalityballot is not null)
+                                    ballots = ballots.Append(_municipalityballot); 
+                                
+                                _municipalityballot = new() { type = groupedballot.Key, };
+                            }
+
+                            _municipalityballot.pkProvince ??= ballot.pkProvince;
+                            _municipalityballot.pkMunicipality ??= ballot.pkMunicipality;
+                            _municipalityballot.pkElectoralEvent ??= ballot.pkElectoralEvent;
+                            _municipalityballot.UpdateBallot(ballot);
+                        }
+
                         _eventballot.UpdateBallot(ballot);
-                        _eventballot.pkElectoralEvent ??= ballot.pkElectoralEvent;
                         _eventballot.pkProvince ??= ismunicipal ? null : ballot.pkProvince;
+                        _eventballot.pkElectoralEvent ??= ballot.pkElectoralEvent;
                     }
                     
                     electoralEventBallot?.UpdatePartyVotes(_eventballot.list_pkParty_votes);
 
-                    return _eventballot;
-                })) 
+                    return ballots.Prepend(_eventballot);
+
+                }).OrderBy(_ => _.pkMunicipality.HasValue)) 
             {
                 Ballot added = sqliteConnection.CreateAndAdd(eventballot);
                 parameters.BallotsElectoralEvent.Add(added);
-                electoralEvent.list_pkBallot = Utils.CSV.AddPKIfUnique(electoralEvent.list_pkBallot, added.pk);
+
+                if (ElectoralEvent.IsMunicipal(electoralEvent.type))
+                {
+                    if (added.pkMunicipality is null)
+                        electoralEvent.list_pkBallot = Utils.CSV.AddPKIfUnique(electoralEvent.list_pkBallot, added.pk);
+                }
+                else electoralEvent.list_pkBallot = Utils.CSV.AddPKIfUnique(electoralEvent.list_pkBallot, added.pk);
             }
 
             sqliteConnection.Update(electoralEventBallot);
