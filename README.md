@@ -1,4 +1,4 @@
-# database.iec
+# Database.IEC
 IEC election results database built from data supplied by the IEC and used for the api found at https://api.xyclonedesigns.co.za/iec/rest
 
 Data for the following elections is present
