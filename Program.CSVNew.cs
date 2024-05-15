@@ -3,13 +3,14 @@ using DataProcessor.Tables;
 
 using SQLite;
 
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Xml.Linq;
 
 namespace DataProcessor
 {
-    internal partial class Program
+	internal partial class Program
     {
         public static void CSVNew<TCSVRow>(SQLiteConnection sqliteConnection, StreamWriter log, IEnumerable<TCSVRow> rows) where TCSVRow : CSVRow
         {

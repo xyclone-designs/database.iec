@@ -1,19 +1,13 @@
 ﻿using DataProcessor.Tables;
 
-using Newtonsoft.Json;
-using Newtonsoft.Json.Bson;
-using Newtonsoft.Json.Linq;
-
 using SQLite;
-using SQLitePCL;
 
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
+using System;
+using System.IO;
 
 namespace DataProcessor.Utils
 {
-    public class SQL
+	public class SQL
     {
         public static bool ReportProvince(int? provincePK, SQLiteConnection sqliteConnection, StreamWriter? streamWriterErrors)
         {

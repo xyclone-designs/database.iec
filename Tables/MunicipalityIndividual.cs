@@ -1,6 +1,4 @@
 ﻿
-using System.Linq;
-
 namespace DataProcessor.Tables
 {
     [SQLite.Table("municipalities")]

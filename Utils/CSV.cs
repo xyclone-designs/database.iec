@@ -1,4 +1,6 @@
-﻿namespace DataProcessor.Utils
+﻿using System.Linq;
+
+namespace DataProcessor.Utils
 {
     public class CSV
     {

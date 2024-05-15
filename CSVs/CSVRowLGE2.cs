@@ -1,5 +1,4 @@
-﻿
-using DataProcessor.Tables;
+﻿using DataProcessor.Tables;
 
 namespace DataProcessor.CSVs
 {

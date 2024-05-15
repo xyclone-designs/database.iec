@@ -1,5 +1,7 @@
-﻿
-using DataProcessor.Tables;
+﻿using DataProcessor.Tables;
+
+using System;
+using System.Linq;
 
 namespace DataProcessor.CSVs
 {

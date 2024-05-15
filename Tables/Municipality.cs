@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json.Linq;
-
+﻿
 namespace DataProcessor.Tables
 {
     [SQLite.Table("municipalities")]

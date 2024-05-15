@@ -1,4 +1,5 @@
-﻿
+﻿using System;
+
 namespace DataProcessor.CSVs
 {
     public abstract class CSVRowLGE3 : CSVRowLGE

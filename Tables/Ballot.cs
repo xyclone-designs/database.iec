@@ -1,4 +1,5 @@
-﻿
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace DataProcessor.Tables
@@ -20,6 +21,7 @@ namespace DataProcessor.Tables
         public int? pkVotingDistrict { get; set; }
         public int? pkWard { get; set; }
         public string? list_pkParty_votes { get; set; }
+        public string? list_pkParty_seats { get; set; }
         public string? type { get; set; }
         public int? votersRegistered 
         {

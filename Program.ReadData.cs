@@ -1,17 +1,22 @@
 ﻿using DataProcessor.CSVs;
 using DataProcessor.Tables;
+
 using Newtonsoft.Json.Linq;
+
 using SQLite;
+
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Xml.Linq;
+using System.Linq;
+using System.Net.Http;
 
 namespace DataProcessor
 {
-    internal partial class Program
+	internal partial class Program
     {
-        static void ReadDataAllocations(SQLiteConnection sqliteConnection, ZipArchive data, StreamWriter log)
+		static void ReadDataAllocations(SQLiteConnection sqliteConnection, ZipArchive data, StreamWriter log)
         {
             IEnumerable<string[]> Read()
             {

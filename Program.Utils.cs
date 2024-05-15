@@ -1,7 +1,17 @@
 ﻿using DataProcessor.CSVs;
 using DataProcessor.Tables;
+using DataProcessor.XLSs;
+
+using ExcelDataReader;
 
 using SQLite;
+
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
 
 namespace DataProcessor
 {
@@ -103,5 +113,28 @@ namespace DataProcessor
                 }
             }
         }
-    }
+
+		public static IEnumerable<TXLSSeats> UtilsXLSSeats<TXLSSeats>(ZipArchive datazip, string prefix, Func<DataSet, TXLSSeats> create) where TXLSSeats : XLSSeats
+		{
+			foreach (ZipArchiveEntry entry in datazip.Entries
+					.Where(entry =>
+					{
+						return
+							entry.FullName.StartsWith("lge-seats") &&
+							entry.FullName.Contains(prefix) &&
+							entry.FullName.EndsWith(".xls");
+					}))
+			{
+				using Stream entrystream = entry.Open();
+				using MemoryStream entrymemorystream = new();
+				entrystream.CopyTo(entrymemorystream);
+				using IExcelDataReader exceldatareader = ExcelReaderFactory.CreateReader(entrymemorystream);
+				using DataSet dataset = exceldatareader.AsDataSet();
+
+				TXLSSeats seats = create.Invoke(dataset);
+
+				yield return seats;
+			}
+		}
+	}
 }
