@@ -1,6 +1,4 @@
-﻿using DataProcessor.CSVs;
-using DataProcessor.Tables;
-using DataProcessor.XLSs;
+﻿using DataProcessor.Tables;
 
 using ExcelDataReader;
 
@@ -12,12 +10,13 @@ using System.Data;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text;
 
 namespace DataProcessor
 {
     internal partial class Program
     {
-        static void UtilsCSVLog<TCSVRow>(SQLiteConnection sqliteConnection, StreamWriter log, IEnumerable<TCSVRow> rows) where TCSVRow : CSVRow
+        static void UtilsCSVLog<TCSVRow>(SQLiteConnection sqliteConnection, StreamWriter log, IEnumerable<TCSVRow> rows) where TCSVRow : CSVs.CSVRow
         {
             foreach (TCSVRow row in rows)
             {
@@ -27,7 +26,7 @@ namespace DataProcessor
                 Operations.Log<Ward, TCSVRow>(row, log);
             }
         }
-        static IEnumerable<TCSVRow> UtilsCSVRows<TCSVRow>(StreamWriter log, params string[] filepaths) where TCSVRow : CSVRow
+        static IEnumerable<TCSVRow> UtilsCSVRows<TCSVRow>(StreamWriter log, params string[] filepaths) where TCSVRow : CSVs.CSVRow
         {
             foreach (string filepath in filepaths)
             {
@@ -47,19 +46,19 @@ namespace DataProcessor
                     {
                         row = true switch
                         {
-                            true when typeof(TCSVRow) == typeof(NE1994) => new NE1994(line) { LineNumber = linecurrent } as TCSVRow,
-                            true when typeof(TCSVRow) == typeof(PE1994) => new PE1994(line) { LineNumber = linecurrent } as TCSVRow,
-                            true when typeof(TCSVRow) == typeof(NPE1999) => new NPE1999(line) { LineNumber = linecurrent } as TCSVRow,
-                            true when typeof(TCSVRow) == typeof(LGE2000) => new LGE2000(line) { LineNumber = linecurrent } as TCSVRow,
-                            true when typeof(TCSVRow) == typeof(NPE2004) => new NPE2004(line) { LineNumber = linecurrent } as TCSVRow,
-                            true when typeof(TCSVRow) == typeof(LGE2006) => new LGE2006(line) { LineNumber = linecurrent } as TCSVRow,
-                            true when typeof(TCSVRow) == typeof(NPE2009) => new NPE2009(line) { LineNumber = linecurrent } as TCSVRow,
-                            true when typeof(TCSVRow) == typeof(LGE2011) => new LGE2011(line) { LineNumber = linecurrent } as TCSVRow,
-                            true when typeof(TCSVRow) == typeof(NPE2014) => new NPE2014(line) { LineNumber = linecurrent } as TCSVRow,
-                            true when typeof(TCSVRow) == typeof(LGE2016) => new LGE2016(line) { LineNumber = linecurrent } as TCSVRow,
-                            true when typeof(TCSVRow) == typeof(NE2019) => new NE2019(line) { LineNumber = linecurrent } as TCSVRow,
-                            true when typeof(TCSVRow) == typeof(PE2019) => new PE2019(line) { LineNumber = linecurrent } as TCSVRow,
-                            true when typeof(TCSVRow) == typeof(LGE2021) => new LGE2021(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.NE1994) => new CSVs.NE1994(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.PE1994) => new CSVs.PE1994(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.NPE1999) => new CSVs.NPE1999(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.LGE2000) => new CSVs.LGE2000(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.NPE2004) => new CSVs.NPE2004(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.LGE2006) => new CSVs.LGE2006(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.NPE2009) => new CSVs.NPE2009(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.LGE2011) => new CSVs.LGE2011(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.NPE2014) => new CSVs.NPE2014(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.LGE2016) => new CSVs.LGE2016(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.NE2019) => new CSVs.NE2019(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.PE2019) => new CSVs.PE2019(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.LGE2021) => new CSVs.LGE2021(line) { LineNumber = linecurrent } as TCSVRow,
 
                             _ => throw new Exception(),
                         };
@@ -71,7 +70,7 @@ namespace DataProcessor
                 }
             }
         }
-        static IEnumerable<TCSVRow> UtilsCSVRows<TCSVRow>(StreamWriter log, params Stream[] streams) where TCSVRow : CSVRow
+        static IEnumerable<TCSVRow> UtilsCSVRows<TCSVRow>(StreamWriter log, params Stream[] streams) where TCSVRow : CSVs.CSVRow
         {
             foreach (Stream stream in streams)
             {
@@ -89,19 +88,19 @@ namespace DataProcessor
                     {
                         row = true switch
                         {
-                            true when typeof(TCSVRow) == typeof(NE1994) => new NE1994(line) { LineNumber = linecurrent } as TCSVRow,
-                            true when typeof(TCSVRow) == typeof(PE1994) => new PE1994(line) { LineNumber = linecurrent } as TCSVRow,
-                            true when typeof(TCSVRow) == typeof(NPE1999) => new NPE1999(line) { LineNumber = linecurrent } as TCSVRow,
-                            true when typeof(TCSVRow) == typeof(LGE2000) => new LGE2000(line) { LineNumber = linecurrent } as TCSVRow,
-                            true when typeof(TCSVRow) == typeof(NPE2004) => new NPE2004(line) { LineNumber = linecurrent } as TCSVRow,
-                            true when typeof(TCSVRow) == typeof(LGE2006) => new LGE2006(line) { LineNumber = linecurrent } as TCSVRow,
-                            true when typeof(TCSVRow) == typeof(NPE2009) => new NPE2009(line) { LineNumber = linecurrent } as TCSVRow,
-                            true when typeof(TCSVRow) == typeof(LGE2011) => new LGE2011(line) { LineNumber = linecurrent } as TCSVRow,
-                            true when typeof(TCSVRow) == typeof(NPE2014) => new NPE2014(line) { LineNumber = linecurrent } as TCSVRow,
-                            true when typeof(TCSVRow) == typeof(LGE2016) => new LGE2016(line) { LineNumber = linecurrent } as TCSVRow,
-                            true when typeof(TCSVRow) == typeof(NE2019) => new NE2019(line) { LineNumber = linecurrent } as TCSVRow,
-                            true when typeof(TCSVRow) == typeof(PE2019) => new PE2019(line) { LineNumber = linecurrent } as TCSVRow,
-                            true when typeof(TCSVRow) == typeof(LGE2021) => new LGE2021(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.NE1994) => new CSVs.NE1994(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.PE1994) => new CSVs.PE1994(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.NPE1999) => new CSVs.NPE1999(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.LGE2000) => new CSVs.LGE2000(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.NPE2004) => new CSVs.NPE2004(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.LGE2006) => new CSVs.LGE2006(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.NPE2009) => new CSVs.NPE2009(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.LGE2011) => new CSVs.LGE2011(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.NPE2014) => new CSVs.NPE2014(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.LGE2016) => new CSVs.LGE2016(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.NE2019) => new CSVs.NE2019(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.PE2019) => new CSVs.PE2019(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.LGE2021) => new CSVs.LGE2021(line) { LineNumber = linecurrent } as TCSVRow,
 
                             _ => throw new Exception(),
                         };
@@ -113,9 +112,10 @@ namespace DataProcessor
                 }
             }
         }
-
-		public static IEnumerable<TXLSSeats> UtilsXLSSeats<TXLSSeats>(ZipArchive datazip, string prefix, Func<DataSet, TXLSSeats> create) where TXLSSeats : XLSSeats
+        static IEnumerable<TXLSSeats> UtilsXLSSeats<TXLSSeats>(ZipArchive datazip, string prefix, Func<DataSet, TXLSSeats> create) where TXLSSeats : XLSs.XLSSeats
 		{
+			Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
 			foreach (ZipArchiveEntry entry in datazip.Entries
 					.Where(entry =>
 					{
@@ -132,6 +132,8 @@ namespace DataProcessor
 				using DataSet dataset = exceldatareader.AsDataSet();
 
 				TXLSSeats seats = create.Invoke(dataset);
+
+                seats.MunicipalityGeo = CSVs.CSVRow.Utils.RowToMunicipalityGeo(entry.FullName.Split('\\', '.', '_')[^2]);
 
 				yield return seats;
 			}

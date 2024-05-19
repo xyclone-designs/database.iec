@@ -280,14 +280,15 @@ namespace DataProcessor.CSVs
                 string[] textSplit = _text.Split('-', 2);
 
                 if (textSplit.Length == 1 && textSplit[0].EndsWith(']'))
-                    return Clean(textSplit[0].Split('[')[0]);
+                    return Clean(textSplit[0].Split('[')[0])?.Replace("KZDMA", "KZNDMA");
 
                 _text = textSplit[0]
                     .Replace("KZDMA", "KZNDMA")
-                    .Trim(' ', '"')
-                    .ToUpper();
+                    .Trim(' ', '"');
 
-                _text = _text switch
+				if (_text.StartsWith("NP", StringComparison.OrdinalIgnoreCase)) _text = _text.Replace("NP", "LIM", StringComparison.OrdinalIgnoreCase);
+
+				_text = _text.ToUpper() switch
                 {
                     "CAPE TOWN" => "CPT",
                     "PRETORIA" => "TSH",
@@ -296,7 +297,28 @@ namespace DataProcessor.CSVs
                     "EAST RAND" => "EKU",
                     "JOHANNESBURG" => "JHB",
 
-                    "KZNDMA22 [HIGHMOOR/KAMBERG PARK]" => "KZNDMA22",
+					"EC05B3" => "EC441",
+					"EC152" => "EC444",
+					"GT412" => "GT482",
+					"GT414" => "GT483",
+					"NP03A2" => "LIM473",
+					"GT02B2" => "CBLC2",
+					"NCDMA45" or "NCDMACB1" => "NCDMACB1",
+					"CBLC6" => "MP325",
+					"LIM03A3" => "LIM474",
+					"LIM03A4" => "CBLC3",
+					"LIM03A5" => "CBLC4",
+					"LIM03A6" => "LIM475",
+					"LIMDMA33" => "CBDMA4",
+					"KZN5A3" or "KZ5A3" => "EC441",
+
+					"KZ5A1" => "KZN5A1",
+					"KZ5A2" => "KZN5A2",
+					"KZ5A4" => "KZN5A4",
+					"KZ5A5" => "KZN5A5",
+					"KZ5A6" => "KZN5A6",
+
+					"KZNDMA22 [HIGHMOOR/KAMBERG PARK]" => "KZNDMA22",
                     "KZNDMA23 [GAINTS CASTLE GAME RESERVE]" => "KZNDMA23",
                     "KZNDMA27 [ST LUCIA PARK]" => "KZNDMA27",
                     "KZNDMA43 [MKHOMAZI WILDERNESS AREA]" => "KZNDMA43",
@@ -332,13 +354,6 @@ namespace DataProcessor.CSVs
                     "WCDMA03 [OVERBERG DC]" => "WCDMA03",
                     "WCDMA04 [SOUTH CAPE DC]" => "WCDMA04",
                     "WCDMA05 [CENTRAL KAROO DC]" => "WCDMA05",
-
-                    "KZ5A1" => "KZN5A1",
-                    "KZ5A2" => "KZN5A2",
-                    "KZ5A3" => "KZN5A3",
-                    "KZ5A4" => "KZN5A4",
-                    "KZ5A5" => "KZN5A5",
-                    "KZ5A6" => "KZN5A6",
 
                     /*[94493]*/
                     "KZ211" => "KZN211",
@@ -473,9 +488,7 @@ namespace DataProcessor.CSVs
 
                 };
 
-                if (_text.StartsWith("NP", StringComparison.OrdinalIgnoreCase)) _text = _text.Replace("NP", "LIM", StringComparison.OrdinalIgnoreCase);
-
-                return _text.ToUpper();
+                return _text.Trim().ToUpper();
             }
             public static string? RowToMunicipalityName(string _text)
             {
@@ -548,49 +561,61 @@ namespace DataProcessor.CSVs
                     .Select(_ => Clean(_))
                     .OfType<string>());
 
-                row = row.ToUpper() switch
-                {
-                    "ACTIONSA" => "Action SA",
-                    "AFRICAN NATIONAL CONGRESS" => "African National Congress",
-                    "AFRICAN CHRISTIAN DEMOCRATIC PARTY" => "African Christian Democratic Party",
-                    "AFRICAN CHRISTIAN ALLIANCE-AFRIKANER CHRISTEN ALLIANSIE" => "African Christian Alliance / Afrikaner Christen Alliansie",
-                    "CAPE PARTY/ KAAPSE PARTY" or
-                    "CAPE INDEPENDENCE PARTY/KAAPSE ONAFHANKLIKHEIDS PARTY" => "Cape Independence Party / Kaapse Onafhanklikheids Party",
-                    "CIVIC ALLIANSIE/ALLIANCE" => "Civic Alliansie",
-                    "CHRISTIAN UNITED MOVEMENT S.A (THE RIGHT CHOICE)" => "Christian United Movement SA (The Right Choice)",
-                    "CONGRESS  OF THE PEOPLE" => "Congress Of The People",
-                    "DEMOCRATIC ALLIANCE/DEMOKRATIESE ALLIANSIE" => "Democratic Alliance",
-                    "DR JS MOROKA" => "Dr J S Moroka",
-                    "ECOPEACE" => "Ecopeace Party",
-                    "FRONT NASIONAAL" or
-                    "FRONT NASIONAAL/FRONT NATIONAL" => "Front Nasionaal / Front National",
-                    "DAGGA PARTY" or
-                    "IQELA LENTSANGO - DAGGA PARTY" => "IQELA LENTSANGO / DAGGA PARTY",
-                    "IZWI LETHU PARTY" => "Izwe Lethu Party",
-                    "LEPELLE-NKUMPI" => "Lepele-Nkumpi",
-                    "MAPSIXTEEN CIVIC MOVEMENT" => "Map 16 Civic Movement",
-                    "NASIONALE AKSIE" => "National Alliance / Nasionale Aksie",
-                    "NEW NATIONAL PARTY" or
-                    "NUWE NASIONALE PARTY" or
-                    "NUWE NASIONALE PARTY/NEW NATIONAL PARTY" => "New National Party / Nuwe Nasionale Party",
-                    "NASIONAAL DEMOKRATIESE PARTY/NATIONAL DEMOCRATIC PARTY" => "Nasionaal Demokratiese Party / National Democratic Party",
-                    "NATIONAL PEOPLES AMBASSADORS" => "National People's Ambassadors",
-                    "PAN AFRICAN SOCIALIST MOVEMENT OF AZANIA" => "Pan Africanist Congress Of Azania",
-                    "RISE UP AFRICA/TSOGA AFRICA" => "Rise Up Africa / Tsoga Africa",
-                    "THEMBISA CONCERNED RESIDENTS' ASSOCIATION" => "Thembisa Concerned Residents Association",
-                    "SOUTH AFRICAN MAINTANANCE AND ESTATE BENEFICIARIES ASSOCIATI" or
-                    "SOUTH AFRICAN MAINTENANCE AND ESTATE BENEFICIARIES ASSOCIATI" => "South African Maintenance and Estate Beneficiaries Association",
-                    "SOUTH AFRICAN CONCERNED RESIDENTS ORGANISATION 4 SERVICE DEL" => "South African Concerned Residents Organisation 4 Service Delivery",
-                    "SUNRISE PARK PROTEA CITY AND GREENSIDE RESIDENTS' ASSOCIATI" => "Sunrise Park Protea City and Greenside Residents' Association",
-                    "UNITED MAJORITY  FRONT" => "United Majority Front",
-                    "UMHLABA UHLAGENE PEOPLES UNITED NATIONS" => "Umhlaba Uhlangene People's United Nations",
-                    "UMEMPLOYED PEOPLE'S ASSOCIATION" => "Unemployed People's Association",
-                    "VOTER'S INDEPENDENT PARTY - SA" => "Voter's Independent Party SA",
-                    "VISION- VISIE 2000+" => "Vision/Visie 2000+",
-                    "WORKING-TOGETHER POLITICAL PARTY" => "Working Together Political Party",
+                row = row.ToUpper()
+					.Trim() switch
+                    {
+                        "ACTIONSA" => "Action SA",
+					    "AFRICAN NATIONAL CONGRESS *" or
+					    "AFRICAN NATIONAL CONGRESS (PF)" or
+                        "AFRICAN NATIONAL CONGRESS" 
+                            => "African National Congress",
+                        "AFRICAN CHRISTIAN DEMOCRATIC PARTY" => "African Christian Democratic Party",
+                        "AFRICAN CHRISTIAN ALLIANCE-AFRIKANER CHRISTEN ALLIANSIE" => "African Christian Alliance / Afrikaner Christen Alliansie",
+                        "CAPE PARTY/KAAPSE PARTY" or
+                        "CAPE PARTY/ KAAPSE PARTY" or
+                        "CAPE INDEPENDENCE PARTY/KAAPSE ONAFHANKLIKHEIDS PARTY" => "Cape Independence Party / Kaapse Onafhanklikheids Party",
+                        "CIVIC ALLIANSIE/ALLIANCE" => "Civic Alliansie",
+                        "CHRISTIAN UNITED MOVEMENT S.A (THE RIGHT CHOICE)" => "Christian United Movement SA (The Right Choice)",
+                        "CONGRESS  OF THE PEOPLE" => "Congress Of The People",
+                        "DEMOCRATIC ALLIANCE *" or
+                        "DEMOCRATIC ALLIANCE (PF)" or
+                        "DEMOCRATIC ALLIANCE/DEMOKRATIESE ALLIANSIE" => "Democratic Alliance",
+                        "DR JS MOROKA" => "Dr J S Moroka",
+                        "ECOPEACE" => "Ecopeace Party",
+                        "FRONT NASIONAAL" or
+                        "FRONT NASIONAAL/FRONT NATIONAL" => "Front Nasionaal / Front National",
+                        "DAGGA PARTY" or
+                        "IQELA LENTSANGO - DAGGA PARTY" => "IQELA LENTSANGO / DAGGA PARTY",
+					    "GEMINI MOVEMENT" => "Gemini",
+					    "HOËVELDRIF INWONERS VERENIGING" => "Hoeveldrif Inwoners Vereniging",
+                        "IZWI LETHU PARTY" => "Izwe Lethu Party",
+                        "LEPELLE-NKUMPI" => "Lepele-Nkumpi",
+                        "MAPSIXTEEN CIVIC MOVEMENT" => "Map 16 Civic Movement",
+                        "NASIONALE AKSIE" => "National Alliance / Nasionale Aksie",
+                        "NEW NATIONAL PARTY" or
+                        "NUWE NASIONALE PARTY" or
+                        "NUWE NASIONALE PARTY/NEW NATIONAL PARTY" => "New National Party / Nuwe Nasionale Party",
+                        "NASIONAAL DEMOKRATIESE PARTY/NATIONAL DEMOCRATIC PARTY" => "Nasionaal Demokratiese Party / National Democratic Party",
+                        "NATIONAL PEOPLES AMBASSADORS" => "National People's Ambassadors",
+                        "PAN AFRICAN SOCIALIST MOVEMENT OF AZANIA" => "Pan Africanist Congress Of Azania",
+                        "RISE UP AFRICA/TSOGA AFRICA" => "Rise Up Africa / Tsoga Africa",
+                        "THEMBISA CONCERNED RESIDENTS' ASSOCIATION" => "Thembisa Concerned Residents Association",
+                        "SOUTH AFRICAN MAINTANANCE AND ESTATE BENEFICIARIES ASSOCIATI" or
+                        "SOUTH AFRICAN MAINTENANCE AND ESTATE BENEFICIARIES ASSOCIATI" => "South African Maintenance and Estate Beneficiaries Association",
+                        "SOUTH AFRICAN CONCERNED RESIDENTS ORGANISATION 4 SERVICE DEL" => "South African Concerned Residents Organisation 4 Service Delivery",
+                        "SUNRISE PARK PROTEA CITY AND GREENSIDE RESIDENTS' ASSOCIATI" or
+					    "SUNRISE PARK, PROTEA CITY AND GREENSIDE RESIDENTS ASSOCIATI" or
+					    "SUNRISE PARK, PROTEA CITY AND GREENSIDE RESIDENTS' ASSOCIATI"
+						    => "Sunrise Park Protea City and Greenside Residents' Association",
+                        "UNITED MAJORITY  FRONT" => "United Majority Front",
+                        "UMHLABA UHLAGENE PEOPLES UNITED NATIONS" => "Umhlaba Uhlangene People's United Nations",
+                        "UMEMPLOYED PEOPLE'S ASSOCIATION" => "Unemployed People's Association",
+                        "VOTER'S INDEPENDENT PARTY - SA" => "Voter's Independent Party SA",
+                        "VISION- VISIE 2000+" => "Vision/Visie 2000+",
+                        "WORKING-TOGETHER POLITICAL PARTY" => "Working Together Political Party",
 
-                    _ => row
-                };
+                        _ => row
+                    };
 
                 row = Titlelise(row);
 

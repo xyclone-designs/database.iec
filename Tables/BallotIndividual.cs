@@ -13,6 +13,7 @@ namespace DataProcessor.Tables
             pkProvince = ballot.pkProvince;
             pkVotingDistrict = ballot.pkVotingDistrict;
             pkWard = ballot.pkWard;
+			list_pkParty_seats = ballot.list_pkParty_seats;
             list_pkParty_votes = ballot.list_pkParty_votes;
             type = ballot.type;
             votersRegistered = ballot.votersRegistered;

@@ -1,8 +1,7 @@
-﻿using DataProcessor.CSVs;
-using DataProcessor.Tables;
-using DataProcessor.XLSs;
+﻿
 
-using ExcelDataReader;
+using DataProcessor.CSVs;
+using DataProcessor.Tables;
 
 using SQLite;
 
@@ -12,20 +11,16 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text;
 
 namespace DataProcessor
 {
     internal partial class Program
     {
         static void Main(string[] args)
-        {
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-
-            string dbname = "iec.db";
-            string dbnameversioned = "iec.01.db";
+		{
+			string dbname = "iec.db";
+            string dbnameversioned = "iec.1.db";
             string logname = "log.txt";
-            string lgeseats = "lge-seats";
             string directory = Directory.GetCurrentDirectory();
             string dbpath = Path.Combine(directory, dbname);
             string dbpathversioned = Path.Combine(directory, dbnameversioned);
@@ -83,7 +78,7 @@ namespace DataProcessor
             ReadDataMunicipalities(sqliteConnection, datazip, logstreamwriter);
 
             List<ElectoralEvent> electoralevents = [.. sqliteConnection.Table<ElectoralEvent>()];
-            CSVParameters parameters = new()
+			CSVParameters parameters = new()
             {
                 ElectoralEvents = [],
                 Parties = [],
@@ -212,7 +207,7 @@ namespace DataProcessor
 
                 ElectoralEvent LGE2000ElectoralEvent = electoralevents.First(_ => LGE2000.IsElectoralEvent(_));
                 List<LGE2000> LGE2000Rows = UtilsCSVRows<LGE2000>(logstreamwriter, datazip.Entries.First(entry => entry.FullName.EndsWith("2000 LGE.csv")).Open()).ToList();
-                List<XLSSeatsLGE2000> LGE2000Seats = UtilsXLSSeats<XLSSeatsLGE2000>(datazip, "LGE2000", dataset => new XLSSeatsLGE2000(dataset)).ToList();
+                List<XLSs.LGE2000> LGE2000Seats = UtilsXLSSeats<XLSs.LGE2000>(datazip, "LGE2000", dataset => new XLSs.LGE2000(dataset)).ToList();
 
 				Console.WriteLine("LGE2000 - New Parties"); parameters.Parties = CSVNewParties(sqliteConnection, logstreamwriter, LGE2000Rows);
                 Console.WriteLine("LGE2000 - New Municipalities"); parameters.Municipalities = CSVNewMunicipalities(sqliteConnection, logstreamwriter, LGE2000Rows);
@@ -220,9 +215,11 @@ namespace DataProcessor
                 Console.WriteLine("LGE2000 - New Wards"); parameters.Wards = CSVNewWards(sqliteConnection, logstreamwriter, LGE2000Rows);
                 Console.WriteLine("LGE2000 - CSV"); CSV(sqliteConnection, logstreamwriter, LGE2000ElectoralEvent, LGE2000Rows, parameters);
 
-                LGE2000Rows.Clear();
+				LGE2000Rows.Clear();
 
-                IEnumerable<BallotIndividual> ballotsindividual = sqliteConnection.Table<Ballot>()
+                XLS<XLSs.LGE2000, XLSs.LGE2000.Row>(sqliteConnection, LGE2000ElectoralEvent, LGE2000Seats);
+
+				IEnumerable<BallotIndividual> ballotsindividual = sqliteConnection.Table<Ballot>()
                     .Where(ballot => ballot.pkElectoralEvent == LGE2000ElectoralEvent.pk)
                     .Select(ballot => new BallotIndividual(ballot));
 
@@ -233,37 +230,6 @@ namespace DataProcessor
                 using SQLiteConnection connectionLGE2000 = SQLiteConnection(LGE2000dbpath, true);
                 connectionLGE2000.InsertAll(ballotsindividual);
                 connectionLGE2000.Close();
-
-                foreach (ZipArchiveEntry entry in datazip.Entries
-                    .Where(entry =>
-                    {
-                        return
-                            entry.FullName.StartsWith(lgeseats) &&
-                            entry.FullName.Contains("LGE2000") &&
-                            entry.FullName.EndsWith(".xls");
-                    }))
-                {
-                    using Stream entrystream = entry.Open();
-                    using MemoryStream entrymemorystream = new();
-                    entrystream.CopyTo(entrymemorystream);
-                    using IExcelDataReader exceldatareader = ExcelReaderFactory.CreateReader(entrymemorystream);
-                    using DataSet dataset = exceldatareader.AsDataSet();
-
-                    Console.WriteLine("Entry: {0}", entry.Name);
-                    Console.WriteLine("--------------");
-
-                    foreach (DataTable datatable in dataset.Tables)
-                    {
-                        Console.WriteLine("Table: {0}", datatable.TableName);
-
-                        foreach (DataColumn column in datatable.Columns)
-                            Console.WriteLine("Table: {0}, ColumnName: {1}", datatable.TableName, column.ColumnName);
-
-                        foreach (DataRow datarow in datatable.Rows)
-                            foreach (object? item in datarow.ItemArray)
-                                Console.WriteLine("Table: {0}: Item: {1}", datatable.TableName, item);
-                    }
-                }
             }
 
             // 2004 National & Provincial
@@ -327,7 +293,7 @@ namespace DataProcessor
 
                 ElectoralEvent LGE2006ElectoralEvent = electoralevents.First(_ => LGE2006.IsElectoralEvent(_));
                 List<LGE2006> LGE2006Rows = UtilsCSVRows<LGE2006>(logstreamwriter, datazip.Entries.First(entry => entry.FullName.EndsWith("2006 LGE.csv")).Open()).ToList();
-				List<XLSSeatsLGE2006> LGE2006Seats = UtilsXLSSeats<XLSSeatsLGE2006>(datazip, "LGE2006", dataset => new XLSSeatsLGE2006(dataset)).ToList();
+				List<XLSs.LGE2006> LGE2006Seats = UtilsXLSSeats<XLSs.LGE2006>(datazip, "LGE2006", dataset => new XLSs.LGE2006(dataset)).ToList();
 
 				Console.WriteLine("LGE2006 - New Parties"); parameters.Parties = CSVNewParties(sqliteConnection, logstreamwriter, LGE2006Rows);
                 Console.WriteLine("LGE2006 - New Municipalities"); parameters.Municipalities = CSVNewMunicipalities(sqliteConnection, logstreamwriter, LGE2006Rows);
@@ -337,7 +303,11 @@ namespace DataProcessor
 
                 LGE2006Rows.Clear();
 
-                IEnumerable<BallotIndividual> ballotsindividual = sqliteConnection.Table<Ballot>()
+				XLS<XLSs.LGE2006, XLSs.LGE2006.Row>(sqliteConnection, LGE2006ElectoralEvent, LGE2006Seats);
+
+                ElectoralEventLGEUpdate(sqliteConnection, LGE2006ElectoralEvent, sqliteConnection.Table<Ballot>());
+
+				IEnumerable<BallotIndividual> ballotsindividual = sqliteConnection.Table<Ballot>()
                     .Where(ballot => ballot.pkElectoralEvent == LGE2006ElectoralEvent.pk)
                     .Select(ballot => new BallotIndividual(ballot));
 
@@ -411,7 +381,7 @@ namespace DataProcessor
 
                 ElectoralEvent LGE2011ElectoralEvent = electoralevents.First(_ => LGE2011.IsElectoralEvent(_));
                 List<LGE2011> LGE2011Rows = UtilsCSVRows<LGE2011>(logstreamwriter, datazip.Entries.First(entry => entry.FullName.EndsWith("2011 LGE.csv")).Open()).ToList();
-				List<XLSSeatsLGE2011> LGE2011Seats = UtilsXLSSeats<XLSSeatsLGE2011>(datazip, "LGE2011", dataset => new XLSSeatsLGE2011(dataset)).ToList();
+				List<XLSs.LGE2011> LGE2011Seats = UtilsXLSSeats<XLSs.LGE2011>(datazip, "LGE2011", dataset => new XLSs.LGE2011(dataset)).ToList();
 
 				Console.WriteLine("LGE2011 - New Parties"); parameters.Parties = CSVNewParties(sqliteConnection, logstreamwriter, LGE2011Rows);
                 Console.WriteLine("LGE2011 - New Municipalities"); parameters.Municipalities = CSVNewMunicipalities(sqliteConnection, logstreamwriter, LGE2011Rows);
@@ -421,7 +391,11 @@ namespace DataProcessor
 
                 LGE2011Rows.Clear();
 
-                IEnumerable<BallotIndividual> ballotsindividual = sqliteConnection.Table<Ballot>()
+				XLS<XLSs.LGE2011, XLSs.LGE2011.Row>(sqliteConnection, LGE2011ElectoralEvent, LGE2011Seats);
+
+				ElectoralEventLGEUpdate(sqliteConnection, LGE2011ElectoralEvent, sqliteConnection.Table<Ballot>());
+
+				IEnumerable<BallotIndividual> ballotsindividual = sqliteConnection.Table<Ballot>()
                     .Where(ballot => ballot.pkElectoralEvent == LGE2011ElectoralEvent.pk)
                     .Select(ballot => new BallotIndividual(ballot));
 
@@ -505,7 +479,7 @@ namespace DataProcessor
                     datazip.Entries.First(entry => entry.FullName.EndsWith("2016 LGE NC.csv")).Open(),
                     datazip.Entries.First(entry => entry.FullName.EndsWith("2016 LGE NW.csv")).Open(),
                     datazip.Entries.First(entry => entry.FullName.EndsWith("2016 LGE WP.csv")).Open()).ToList();
-				List<XLSSeatsLGE2016> LGE2016Seats = UtilsXLSSeats<XLSSeatsLGE2016>(datazip, "LGE2016", dataset => new XLSSeatsLGE2016(dataset)).ToList();
+				List<XLSs.LGE2016> LGE2016Seats = UtilsXLSSeats<XLSs.LGE2016>(datazip, "LGE2016", dataset => new XLSs.LGE2016(dataset)).ToList();
 
 				Console.WriteLine("LGE2016 - New Parties"); parameters.Parties = CSVNewParties(sqliteConnection, logstreamwriter, LGE2016Rows);
                 Console.WriteLine("LGE2016 - New Municipalities"); parameters.Municipalities = CSVNewMunicipalities(sqliteConnection, logstreamwriter, LGE2016Rows);
@@ -515,7 +489,11 @@ namespace DataProcessor
 
                 LGE2016Rows.Clear();
 
-                IEnumerable<BallotIndividual> ballotsindividual = sqliteConnection.Table<Ballot>()
+				XLS<XLSs.LGE2016, XLSs.LGE2016.Row>(sqliteConnection, LGE2016ElectoralEvent, LGE2016Seats);
+
+				ElectoralEventLGEUpdate(sqliteConnection, LGE2016ElectoralEvent, sqliteConnection.Table<Ballot>());
+
+				IEnumerable<BallotIndividual> ballotsindividual = sqliteConnection.Table<Ballot>()
                     .Where(ballot => ballot.pkElectoralEvent == LGE2016ElectoralEvent.pk)
                     .Select(ballot => new BallotIndividual(ballot));
 
@@ -607,7 +585,7 @@ namespace DataProcessor
                     datazip.Entries.First(entry => entry.FullName.EndsWith("2021 LGE NC.csv")).Open(),
                     datazip.Entries.First(entry => entry.FullName.EndsWith("2021 LGE NW.csv")).Open(),
                     datazip.Entries.First(entry => entry.FullName.EndsWith("2021 LGE WP.csv")).Open()).ToList();
-				List<XLSSeatsLGE2021> LGE2021Seats = UtilsXLSSeats<XLSSeatsLGE2021>(datazip, "LGE2021", dataset => new XLSSeatsLGE2021(dataset)).ToList();
+				List<XLSs.LGE2021> LGE2021Seats = UtilsXLSSeats<XLSs.LGE2021>(datazip, "LGE2021", dataset => new XLSs.LGE2021(dataset)).ToList();
 
 				Console.WriteLine("LGE2021 - New Parties"); parameters.Parties = CSVNewParties(sqliteConnection, logstreamwriter, LGE2021Rows);
                 Console.WriteLine("LGE2021 - New Municipalities"); parameters.Municipalities = CSVNewMunicipalities(sqliteConnection, logstreamwriter, LGE2021Rows);
@@ -617,7 +595,11 @@ namespace DataProcessor
 
                 LGE2021Rows.Clear();
 
-                IEnumerable<BallotIndividual> ballotsindividual = sqliteConnection.Table<Ballot>()
+				XLS<XLSs.LGE2021, XLSs.LGE2021.Row>(sqliteConnection, LGE2021ElectoralEvent, LGE2021Seats);
+
+				ElectoralEventLGEUpdate(sqliteConnection, LGE2021ElectoralEvent, sqliteConnection.Table<Ballot>());
+
+				IEnumerable<BallotIndividual> ballotsindividual = sqliteConnection.Table<Ballot>()
                     .Where(ballot => ballot.pkElectoralEvent == LGE2021ElectoralEvent.pk)
                     .Select(ballot => new BallotIndividual(ballot));
 
@@ -861,6 +843,50 @@ namespace DataProcessor
 
             }, extension));
         }
+        public static void ElectoralEventLGEUpdate(SQLiteConnection sqliteconnection, ElectoralEvent electoralevent, IEnumerable<Ballot> ballots)
+        {
+            foreach (IGrouping<int?, Ballot> municipalityBallots in ballots.Where(ballot =>
+                ballot.pkElectoralEvent == electoralevent.pk &&
+				ballot.pkProvince != null &&
+				ballot.pkMunicipality != null &&
+				ballot.pkWard == null &&
+				ballot.pkVotingDistrict == null &&
+				ballot.list_pkParty_votes != null).GroupBy(ballot => ballot.pkMunicipality))
+                if (municipalityBallots.Key.HasValue)
+                {
+                    Dictionary<int, int> list_pkParty_votes = [];
+
+                    foreach (int[] municipality_list_pkParty_votes in municipalityBallots.SelectMany(municipalityBallot =>
+                    {
+                        return municipalityBallot.list_pkParty_votes?
+                            .Split(',')
+                            .Select(_ =>
+                            {
+                                string[] split = _.Split(':');
+
+                                return new int[]
+                                {
+                                    int.Parse(split[0]),
+                                    int.Parse(split[1])
+                                };
+
+                            }) ?? Enumerable.Empty<int[]>();
+
+                    })) 
+                        if (list_pkParty_votes.ContainsKey(municipality_list_pkParty_votes[0]))
+                            list_pkParty_votes[municipality_list_pkParty_votes[0]] += municipality_list_pkParty_votes[1];
+                        else list_pkParty_votes.Add(municipality_list_pkParty_votes[0], municipality_list_pkParty_votes[1]);
+
+                    if (list_pkParty_votes.OrderByDescending(kvp => kvp.Value).Select(kvp => kvp.Key).FirstOrDefault() is int pkParty)
+                        electoralevent.list_pkMunicipality_pkParty = Utils.CSV.AddPKPairIfUnique(
+							electoralevent.list_pkMunicipality_pkParty, 
+                            municipalityBallots.Key.Value, 
+                            pkParty, 
+                            false);
+				}
+
+            sqliteconnection.Update(electoralevent);
+		}
         public static bool ChangeBallot<TCSVRow>(TCSVRow row, Ballot? ballot, string? votingdistrictid, string? wardid, string? municipalityvalue) where TCSVRow : CSVRow
         {
             if (ballot is null) return true;
@@ -1193,6 +1219,83 @@ namespace DataProcessor
 
             parameters.ElectoralEvents?.Add(electoralEvent);
         }
+        public static void XLS<TXLSSeats, TXLSSeatsRow>(SQLiteConnection sqliteConnection, ElectoralEvent electoralEvent, IEnumerable<TXLSSeats> seats) 
+            where TXLSSeatsRow : XLSs.XLSSeatsRow 
+            where TXLSSeats : XLSs.XLSSeats<TXLSSeatsRow>
+		{
+			Ballot ballotmunicipalitypr = sqliteConnection.Table<Ballot>()
+				.First(ballot =>
+					ballot.type != null &&
+					ballot.type.Contains("pr") &&
+					ballot.pkElectoralEvent == electoralEvent.pk &&
+					ballot.pkProvince == null &&
+					ballot.pkMunicipality == null &&
+					ballot.pkVotingDistrict == null &&
+					ballot.pkWard == null);
+			Ballot ballotmunicipalityward = sqliteConnection.Table<Ballot>()
+				.First(ballot =>
+					ballot.type != null &&
+					ballot.type.Contains("ward") &&
+					ballot.pkElectoralEvent == electoralEvent.pk &&
+					ballot.pkProvince == null &&
+					ballot.pkMunicipality == null &&
+					ballot.pkVotingDistrict == null &&
+					ballot.pkWard == null);
+			List<Ballot> ballotsmunicipality = sqliteConnection.Table<Ballot>()
+				.Where(ballot =>
+					ballot.type != null &&
+					(ballot.type.Contains("pr") || ballot.type.Contains("ward")) &&
+					ballot.pkElectoralEvent == electoralEvent.pk &&
+					ballot.pkProvince != null &&
+					ballot.pkMunicipality != null &&
+					ballot.pkVotingDistrict == null &&
+					ballot.pkWard == null)
+                .ToList();
+
+            ballotmunicipalitypr.list_pkParty_seats = null;
+			ballotmunicipalityward.list_pkParty_seats = null;
+            foreach (Ballot ballotmunicipality in ballotsmunicipality)
+				ballotmunicipality.list_pkParty_seats = null;
+
+			foreach (Ballot ballotmunicipality in ballotsmunicipality)
+			{
+				Municipality municipality = sqliteConnection.Find<Municipality>(ballotmunicipality.pkMunicipality);
+				TXLSSeats? txlsseats = seats.FirstOrDefault(_seat => _seat.MunicipalityGeo == municipality?.geoCode);
+
+                if (txlsseats?.Rows != null)
+                    foreach (TXLSSeatsRow txlsseatsrow in txlsseats.Rows)
+                    {
+                        bool 
+                            isPr = ballotmunicipality.type!.Contains("pr"),
+                            isWard = ballotmunicipality.type!.Contains("ward");
+
+                        (int? PartySeats, string? PartyName) = true switch
+						{
+							true when txlsseatsrow is XLSs.XLSSeatsLGE1Row xlsseatslge1row && isPr => ((int?)xlsseatslge1row.PRListSeats, xlsseatslge1row.PartyName),
+                            true when txlsseatsrow is XLSs.XLSSeatsLGE1Row xlsseatslge1row && isWard => ((int?)xlsseatslge1row.WardSeats, xlsseatslge1row.PartyName),
+                            true when txlsseatsrow is XLSs.XLSSeatsLGE2Row xlsseatslge2row => ((int?)xlsseatslge2row.TotalPartySeats, xlsseatslge2row.PartyName),
+                            true when txlsseatsrow is XLSs.XLSSeatsLGE3Row xlsseatslge3row => ((int?)xlsseatslge3row.TotalPartySeats, xlsseatslge3row.PartyName),
+
+                            _ => (new int?(), null)
+                        };
+
+						if (PartySeats.HasValue)
+						{
+                            Party party = sqliteConnection.Table<Party>().First(_party => _party.name == PartyName);
+
+							ballotmunicipality.list_pkParty_seats = Utils.CSV.AddPKPairIfUnique(ballotmunicipality.list_pkParty_seats, party.pk, PartySeats.Value, true);
+							if (ballotmunicipalitypr is not null && ballotmunicipality.type!.Contains("pr"))
+								ballotmunicipalitypr.list_pkParty_seats = Utils.CSV.AddPKPairIfUnique(ballotmunicipalitypr.list_pkParty_seats, party.pk, PartySeats.Value, true);
+							if (ballotmunicipalityward is not null && ballotmunicipality.type!.Contains("ward"))
+								ballotmunicipalityward.list_pkParty_seats = Utils.CSV.AddPKPairIfUnique(ballotmunicipalityward.list_pkParty_seats, party.pk, PartySeats.Value, true);
+						}
+					}
+			}
+
+			sqliteConnection.Update(ballotmunicipalitypr, typeof(Ballot));
+			sqliteConnection.Update(ballotmunicipalityward, typeof(Ballot));
+			sqliteConnection.UpdateAll(ballotsmunicipality);
+		}
 
 		public class CSVParameters
         {

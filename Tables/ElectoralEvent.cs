@@ -13,7 +13,7 @@ namespace DataProcessor.Tables
         }
 
         public string? list_pkBallot { get; set; }
-        public string? list_pkMunicipality_pkParty{ get; set; }
+        public string? list_pkMunicipality_pkParty { get; set; }
         public string? list_pkParty_designation_nationalAllocation { get; set; }
         public string? list_pkParty_idProvince_provincialAllocation { get; set; }
         public string? date { get; set; }
