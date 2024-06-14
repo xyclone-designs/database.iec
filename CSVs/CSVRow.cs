@@ -229,6 +229,15 @@ namespace DataProcessor.CSVs
 
                     true when row.Contains("2021") => 17,
 
+                    true when row.Contains("2024") => true switch
+                    {
+                        true when row.Contains(Tables.ElectoralEvent.Types.National, StringComparison.OrdinalIgnoreCase) => 18,
+                        true when row.Contains(Tables.ElectoralEvent.Types.Provincial, StringComparison.OrdinalIgnoreCase) => 19,
+                        true when row.Contains(Tables.ElectoralEvent.Types.Regional, StringComparison.OrdinalIgnoreCase) => 20,
+
+                        _ => throw new Exception("2024 ElectoralEvent with no type")
+                    },
+
                     _ => throw new Exception("ElectoralEvent with no type"),
                 };
             }
@@ -571,6 +580,7 @@ namespace DataProcessor.CSVs
                             => "African National Congress",
                         "AFRICAN CHRISTIAN DEMOCRATIC PARTY" => "African Christian Democratic Party",
                         "AFRICAN CHRISTIAN ALLIANCE-AFRIKANER CHRISTEN ALLIANSIE" => "African Christian Alliance / Afrikaner Christen Alliansie",
+						"BUILD ONE SOUTH AFRICA WITH MMUSI MAIMANE" => "Build One South Africa",
                         "CAPE PARTY/KAAPSE PARTY" or
                         "CAPE PARTY/ KAAPSE PARTY" or
                         "CAPE INDEPENDENCE PARTY/KAAPSE ONAFHANKLIKHEIDS PARTY" => "Cape Independence Party / Kaapse Onafhanklikheids Party",
@@ -592,6 +602,7 @@ namespace DataProcessor.CSVs
                         "LEPELLE-NKUMPI" => "Lepele-Nkumpi",
                         "MAPSIXTEEN CIVIC MOVEMENT" => "Map 16 Civic Movement",
                         "NASIONALE AKSIE" => "National Alliance / Nasionale Aksie",
+                        "THE ORGANIC HUMANITY MOVEMENT" => "Organic Humanity Movement",
                         "NEW NATIONAL PARTY" or
                         "NUWE NASIONALE PARTY" or
                         "NUWE NASIONALE PARTY/NEW NATIONAL PARTY" => "New National Party / Nuwe Nasionale Party",

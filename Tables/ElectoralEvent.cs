@@ -10,6 +10,7 @@ namespace DataProcessor.Tables
             public const string Municipal = "municipal";
             public const string National = "national";
             public const string Provincial = "provincial";
+            public const string Regional = "regional";
         }
 
         public string? list_pkBallot { get; set; }
@@ -27,6 +28,7 @@ namespace DataProcessor.Tables
                 true when row.Contains(Types.Municipal, StringComparison.OrdinalIgnoreCase) => Types.Municipal,
                 true when row.Contains(Types.National, StringComparison.OrdinalIgnoreCase) => Types.National,
                 true when row.Contains(Types.Provincial, StringComparison.OrdinalIgnoreCase) => Types.Provincial,
+                true when row.Contains(Types.Regional, StringComparison.OrdinalIgnoreCase) => Types.Regional,
 
                 _ => null
             };
@@ -46,6 +48,10 @@ namespace DataProcessor.Tables
         public static bool IsMunicipal(string? row)
         {
             return row?.Contains(Types.Municipal, StringComparison.OrdinalIgnoreCase) ?? false;
+        }
+        public static bool IsRegional(string? row)
+        {
+            return row?.Contains(Types.Regional, StringComparison.OrdinalIgnoreCase) ?? false;
         }
     }
 }

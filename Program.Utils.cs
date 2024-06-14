@@ -16,16 +16,6 @@ namespace DataProcessor
 {
     internal partial class Program
     {
-        static void UtilsCSVLog<TCSVRow>(SQLiteConnection sqliteConnection, StreamWriter log, IEnumerable<TCSVRow> rows) where TCSVRow : CSVs.CSVRow
-        {
-            foreach (TCSVRow row in rows)
-            {
-                Operations.Log<Municipality, TCSVRow>(row, log);
-                Operations.Log<Party, TCSVRow>(row, log);
-                Operations.Log<VotingDistrict, TCSVRow>(row, log);
-                Operations.Log<Ward, TCSVRow>(row, log);
-            }
-        }
         static IEnumerable<TCSVRow> UtilsCSVRows<TCSVRow>(StreamWriter log, params string[] filepaths) where TCSVRow : CSVs.CSVRow
         {
             foreach (string filepath in filepaths)
@@ -59,6 +49,9 @@ namespace DataProcessor
                             true when typeof(TCSVRow) == typeof(CSVs.NE2019) => new CSVs.NE2019(line) { LineNumber = linecurrent } as TCSVRow,
                             true when typeof(TCSVRow) == typeof(CSVs.PE2019) => new CSVs.PE2019(line) { LineNumber = linecurrent } as TCSVRow,
                             true when typeof(TCSVRow) == typeof(CSVs.LGE2021) => new CSVs.LGE2021(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.NE2024) => new CSVs.NE2024(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.PE2024) => new CSVs.PE2024(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.RE2024) => new CSVs.RE2024(line) { LineNumber = linecurrent } as TCSVRow,
 
                             _ => throw new Exception(),
                         };
@@ -101,6 +94,9 @@ namespace DataProcessor
                             true when typeof(TCSVRow) == typeof(CSVs.NE2019) => new CSVs.NE2019(line) { LineNumber = linecurrent } as TCSVRow,
                             true when typeof(TCSVRow) == typeof(CSVs.PE2019) => new CSVs.PE2019(line) { LineNumber = linecurrent } as TCSVRow,
                             true when typeof(TCSVRow) == typeof(CSVs.LGE2021) => new CSVs.LGE2021(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.NE2024) => new CSVs.NE2024(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.PE2024) => new CSVs.PE2024(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(CSVs.RE2024) => new CSVs.RE2024(line) { LineNumber = linecurrent } as TCSVRow,
 
                             _ => throw new Exception(),
                         };
