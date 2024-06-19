@@ -777,14 +777,6 @@ namespace DataProcessor
                 sqliteconnectionelectoralevent.InsertAll(parameters.WardsIndividual);
                 sqliteconnectionelectoralevent.Close();
 
-                using FileStream dbelectoraleventfilestream = File.OpenRead(dbelectoraleventpath);
-                using Stream dbelectoraleventarchivestream = iecziparchive
-                    .CreateEntry(dbelectoraleventfilename)
-                    .Open();
-                dbelectoraleventfilestream.CopyTo(dbelectoraleventarchivestream);
-                dbelectoraleventfilestream.Close();
-                dbelectoraleventarchivestream.Close();
-
                 string dbelectoraleventzip = ZipFile(dbelectoraleventpath);
                 using FileStream dbelectoraleventzipfilestream = File.OpenRead(dbelectoraleventzip);
                 using Stream dbelectoraleventziparchivestream = iecziparchive
@@ -822,13 +814,6 @@ namespace DataProcessor
 			dbziparchivestream.Close();
 
             File.Delete(dbzip);
-
-			using FileStream dbfilestream = File.OpenRead(dbpath);
-            using Stream dbziparchivedbstream = iecziparchive.CreateEntry(dbname).Open();
-            dbfilestream.CopyTo(dbziparchivedbstream);
-            dbfilestream.Close();
-            dbziparchivedbstream.Close();
-
             File.Delete(dbpath);
         }
 
