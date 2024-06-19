@@ -731,35 +731,35 @@ namespace DataProcessor
                         {
                             case nameof(CSVParameters.Parties):
                                 parameters.PartiesIndividual = ((IEnumerable<Party>)sqliteConnection.Table<Party>())
-                                    .Where(_ => values[1..^1].Contains(_.pk.ToString()))
+                                    .Where(_ => values[1..^0].Contains(_.pk.ToString()))
                                     .Select(_ => new PartyIndividual(_))
                                     .ToList();
                                 break;
 
                             case nameof(CSVParameters.Provinces):
                                 parameters.ProvincesIndividual = ((IEnumerable<Province>)sqliteConnection.Table<Province>())
-                                    .Where(_ => values[1..^1].Contains(_.pk.ToString()))
+                                    .Where(_ => values[1..^0].Contains(_.pk.ToString()))
                                     .Select(_ => new ProvinceIndividual(_))
                                     .ToList();
                                 break;
 
                             case nameof(CSVParameters.Municipalities):
                                 parameters.MunicipalitiesIndividual = ((IEnumerable<Municipality>)sqliteConnection.Table<Municipality>())
-                                    .Where(_ => values[1..^1].Contains(_.pk.ToString()))
+                                    .Where(_ => values[1..^0].Contains(_.pk.ToString()))
                                     .Select(_ => new MunicipalityIndividual(_))
                                     .ToList();
                                 break;
 
                             case nameof(CSVParameters.VotingDistricts):
                                 parameters.VotingDistrictsIndividual = ((IEnumerable<VotingDistrict>)sqliteConnection.Table<VotingDistrict>())
-                                    .Where(_ => values[1..^1].Contains(_.pk.ToString()))
+                                    .Where(_ => values[1..^0].Contains(_.pk.ToString()))
                                     .Select(_ => new VotingDistrictIndividual(_))
                                     .ToList();
                                 break;
 
                             case nameof(CSVParameters.Wards):
                                 parameters.WardsIndividual = ((IEnumerable<Ward>)sqliteConnection.Table<Ward>())
-                                    .Where(_ => values[1..^1].Contains(_.pk.ToString()))
+                                    .Where(_ => values[1..^0].Contains(_.pk.ToString()))
                                     .Select(_ => new WardIndividual(_))
                                     .ToList();
                                 break;
@@ -785,16 +785,16 @@ namespace DataProcessor
                 dbelectoraleventfilestream.Close();
                 dbelectoraleventarchivestream.Close();
 
-                string dbzip = ZipFile(dbelectoraleventpath);
-                using FileStream dbzipfilestream = File.OpenRead(dbzip);
-                using Stream dbziparchivestream = iecziparchive
-                    .CreateEntry(dbzip.Split("\\").Last())
+                string dbelectoraleventzip = ZipFile(dbelectoraleventpath);
+                using FileStream dbelectoraleventzipfilestream = File.OpenRead(dbelectoraleventzip);
+                using Stream dbelectoraleventziparchivestream = iecziparchive
+                    .CreateEntry(dbelectoraleventzip.Split("\\").Last())
                     .Open();
-                dbzipfilestream.CopyTo(dbziparchivestream);
-                dbzipfilestream.Close();
-                dbziparchivestream.Close();
+				dbelectoraleventzipfilestream.CopyTo(dbelectoraleventziparchivestream);
+                dbelectoraleventzipfilestream.Close();
+                dbelectoraleventziparchivestream.Close();
 
-                File.Delete(dbzip);
+                File.Delete(dbelectoraleventzip);
                 File.Delete(dbelectoraleventpath);
                 File.Delete(txtelectoraleventpath);
             }
@@ -810,14 +810,26 @@ namespace DataProcessor
             logstream.Close();
             logziparchivedbstream.Close();
 
-            using FileStream dbfilestream = File.OpenRead(dbpath);
+			File.Delete(logpath);
+
+			string dbzip = ZipFile(dbpath);
+			using FileStream dbzipfilestream = File.OpenRead(dbzip);
+			using Stream dbziparchivestream = iecziparchive
+				.CreateEntry(dbzip.Split("\\").Last())
+				.Open();
+			dbzipfilestream.CopyTo(dbziparchivestream);
+			dbzipfilestream.Close();
+			dbziparchivestream.Close();
+
+            File.Delete(dbzip);
+
+			using FileStream dbfilestream = File.OpenRead(dbpath);
             using Stream dbziparchivedbstream = iecziparchive.CreateEntry(dbname).Open();
             dbfilestream.CopyTo(dbziparchivedbstream);
             dbfilestream.Close();
             dbziparchivedbstream.Close();
 
             File.Delete(dbpath);
-            File.Delete(logpath);
         }
 
         public static SQLiteConnection SQLiteConnection(string path, bool individual)

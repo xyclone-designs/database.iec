@@ -13,6 +13,7 @@ namespace DataProcessor.Tables
             abbr = party.abbr;
             dateEstablished = party.dateEstablished;
             dateDisestablished = party.dateDisestablished;
+			headquarters = party.headquarters;
             urlWebsite = party.urlWebsite;
             urlLogo = party.urlLogo;
             color = party.color;

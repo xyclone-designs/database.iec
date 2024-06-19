@@ -85,36 +85,46 @@ namespace System.IO.Compression
 
 			sqliteConnection.InsertAll(Rows().Select(row => new Province
 			{
-				// id,name,population,squareKms,urlWebsite
+				// id,name,capital,population,squareKms,urlWebsite
 
 				id = row[0],
 				name = row[1],
-				population = int.Parse(row[2]),
-				squareKms = int.Parse(row[3]),
-				urlWebsite = row[4],
+				capital = row[2],
+				population = int.Parse(row[3]),
+				squareKms = int.Parse(row[4]),
+				urlWebsite = row[5],
 			}));
         }
         public static void ReadDataParties(this ZipArchive zipArchive, SQLiteConnection sqliteConnection, StreamWriter log)
         {
-            using Stream stream = zipArchive.Entries.First(entry => entry.FullName.EndsWith("_PARTIES.csv")).Open();
+			Console.WriteLine("ReadDataParties");
+
+			List<Party> parties = [];
+
+			using Stream stream = zipArchive.Entries.First(entry => entry.FullName.EndsWith("_PARTIES.csv")).Open();
             using StreamReader streamReader = new(stream);
             streamReader.ReadLine();
 
-            IEnumerable<string[]> Rows()
-            {
-                while (streamReader.ReadLine()?.Split(',') is string[] columns && string.IsNullOrWhiteSpace(columns[0]) is false)
-                    yield return columns;
+			for (int line = 2; streamReader.ReadLine()?.Split(',') is string[] columns; line++)
+			{
+				Console.WriteLine("[{0}]: {1} - {2}", line, columns[0], columns[1]);
+
+				if (columns.Length != 6) throw new ArgumentException("Too many columns");
+				
+				parties.Add(new Party
+				{
+					// name,abbr,color,headquarters,urlLogo,urlWebsite
+
+					name = string.Equals("{placeholder}", columns[0]) is false ? columns[0] : null,
+					abbr = string.Equals("{placeholder}", columns[1]) is false ? columns[1] : null,
+					color = string.Equals("{placeholder}", columns[2]) is false ? columns[2] : null,
+					headquarters = string.Equals("{placeholder}", columns[3]) is false ? columns[3] : null,
+					urlLogo = string.Equals("{placeholder}", columns[4]) is false ? columns[4] : null,
+					urlWebsite = string.Equals("{placeholder}", columns[5]) is false ? columns[5] : null,
+				});
 			}
 
-            sqliteConnection.InsertAll(Rows().Select(row => new Party
-            {
-                // name,abbr,color,urlLogo
-
-                name = row[0],
-                abbr = row[1],
-                color = row[2],
-                urlLogo = row[3],
-            }));
-        }
+			sqliteConnection.InsertAll(parties);
+		}
     }
 }

@@ -10,6 +10,7 @@ namespace DataProcessor.Tables
             pk = province.pk;
             id = province.id;
             name = province.name;
+			capital = province.capital;
             population = province.population;
             squareKms = province.squareKms;
             urlCoatOfArms = province.urlCoatOfArms;
