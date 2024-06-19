@@ -13,6 +13,7 @@ namespace DataProcessor.Tables
             public const string Regional = "regional";
         }
 
+        public string? abbr { get; set; }
         public string? list_pkBallot { get; set; }
         public string? list_pkMunicipality_pkParty { get; set; }
         public string? list_pkParty_designation_nationalAllocation { get; set; }

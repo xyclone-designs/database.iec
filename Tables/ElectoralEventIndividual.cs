@@ -9,6 +9,7 @@ namespace DataProcessor.Tables
         public ElectoralEventIndividual(ElectoralEvent electoralEvent)
         {
             pk = electoralEvent.pk;
+			abbr = electoralEvent.abbr;
             list_pkBallot = electoralEvent.list_pkBallot;
 			list_pkMunicipality_pkParty = electoralEvent.list_pkMunicipality_pkParty;
             list_pkParty_designation_nationalAllocation = electoralEvent.list_pkParty_designation_nationalAllocation;

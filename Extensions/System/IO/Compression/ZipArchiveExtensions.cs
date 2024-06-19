@@ -26,29 +26,30 @@ namespace System.IO.Compression
             {
 				foreach (IGrouping<string, string[]> grouped in Read().GroupBy(_ => _[0]))
 				{
-					// electoralevent,date,designation,party,allocation
+					// electoralevent,abbr,date,designation,party,allocation
 
 					IEnumerable<string> allocations = grouped
 						.Where(allocationline =>
 						{
 							return
-								string.IsNullOrWhiteSpace(allocationline[2]) is false &&
 								string.IsNullOrWhiteSpace(allocationline[3]) is false &&
-								string.IsNullOrWhiteSpace(allocationline[4]) is false;
+								string.IsNullOrWhiteSpace(allocationline[4]) is false &&
+								string.IsNullOrWhiteSpace(allocationline[5]) is false;
 						})
 						.Select(allocationline =>
 						{
                             Party party = ((IEnumerable<Party>)sqliteConnection.Table<Party>())
-								.Single(_party => string.Equals(_party.name, allocationline[3], StringComparison.OrdinalIgnoreCase));
+								.Single(_party => string.Equals(_party.name, allocationline[4], StringComparison.OrdinalIgnoreCase));
 
-							return string.Format("{0}:{1}:{2}", party.pk, allocationline[2], allocationline[4]);
+							return string.Format("{0}:{1}:{2}", party.pk, allocationline[3], allocationline[5]);
 						
                         });
 
 					yield return new ElectoralEvent
 					{
 						pk = CSVRow.Utils.RowToElectoralEvent(grouped.First()[0]) ?? throw new Exception(),
-						date = grouped.First()[1],
+						abbr = grouped.First()[1],
+						date = grouped.First()[2],
 						type = ElectoralEvent.Type(grouped.Key),
 						list_pkParty_designation_nationalAllocation = ElectoralEvent.IsNational(grouped.Key) ? string.Join(',', allocations) : null,
 						list_pkParty_idProvince_provincialAllocation = ElectoralEvent.IsProvincial(grouped.Key) ? string.Join(',', allocations) : null,
