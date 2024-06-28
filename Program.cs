@@ -1,6 +1,8 @@
 ﻿using DataProcessor.CSVs;
 using DataProcessor.Tables;
 
+using ICSharpCode.SharpZipLib.GZip;
+
 using SQLite;
 
 using System;
@@ -16,15 +18,17 @@ namespace DataProcessor
     {
         static void Main(string[] args)
 		{
+			string directory = Path.Combine(Directory.GetCurrentDirectory(), ".output");
+
+			if (Directory.Exists(directory) is false) Directory.CreateDirectory(directory);
+
 			string dbname = "iec.db";
             string dbnameversioned = "iec.1.db";
             string logname = "log.txt";
-            string directory = Directory.GetCurrentDirectory();
-            string dbpath = Path.Combine(directory, dbname);
+			string dbpath = Path.Combine(directory, dbname);
             string dbpathversioned = Path.Combine(directory, dbnameversioned);
             string logpath = Path.Combine(directory, logname);
-            string ieczippath = Path.Combine(directory, "iec.zip");
-            string datapath = Path.Combine(directory, "data.zip");
+            string datapath = Path.Combine(Directory.GetCurrentDirectory(), "data.zip");
             int[] pksElectoralEvent =
             [
                 01,
@@ -51,7 +55,6 @@ namespace DataProcessor
 
 			if (File.Exists(dbpath)) File.Delete(dbpath);
             if (File.Exists(dbpathversioned)) File.Delete(dbpathversioned);
-            if (File.Exists(ieczippath)) File.Delete(ieczippath);
             if (File.Exists(logpath)) File.Delete(logpath);
 
             using FileStream datastream = File.OpenRead(datapath);
@@ -60,18 +63,7 @@ namespace DataProcessor
             using ZipArchive datazip = new(datastream);
             using SQLiteConnection sqliteConnection = SQLiteConnection(dbpath, false);
 
-            using FileStream ieczipfilestream = File.Create(ieczippath);
-            using ZipArchive iecziparchive = new(ieczipfilestream, ZipArchiveMode.Create, true);
-
             SQLiteConnection(dbpathversioned, false).Close();
-            using FileStream dbversionedfilestream = File.OpenRead(dbpathversioned);
-            using Stream dbversionedstream = iecziparchive
-                .CreateEntry(dbnameversioned)
-                .Open();
-            dbversionedfilestream.CopyTo(dbversionedstream);
-            dbversionedstream.Close();
-            dbversionedfilestream.Close();
-            File.Delete(dbpathversioned);
 
 			datazip.ReadDataProvinces(sqliteConnection, logstreamwriter);
             datazip.ReadDataParties(sqliteConnection, logstreamwriter);
@@ -719,6 +711,9 @@ namespace DataProcessor
             {
                 string dbelectoraleventpath = ElectoralEventPath(directory, electoralevent, "db", out string dbelectoraleventfilename);
                 string txtelectoraleventpath = ElectoralEventPath(directory, electoralevent, "txt");
+                
+                if (File.Exists(txtelectoraleventpath) is false) continue;
+
                 using SQLiteConnection sqliteconnectionelectoralevent = SQLiteConnection(dbelectoraleventpath, true);
                 using FileStream txtelectoraleventfilestream = File.OpenRead(txtelectoraleventpath);
                 using StreamReader txtelectoraleventstreamreader = new(txtelectoraleventfilestream);
@@ -777,45 +772,25 @@ namespace DataProcessor
                 sqliteconnectionelectoralevent.InsertAll(parameters.WardsIndividual);
                 sqliteconnectionelectoralevent.Close();
 
-                string dbelectoraleventzip = ZipFile(dbelectoraleventpath);
-                using FileStream dbelectoraleventzipfilestream = File.OpenRead(dbelectoraleventzip);
-                using Stream dbelectoraleventziparchivestream = iecziparchive
-                    .CreateEntry(dbelectoraleventzip.Split("\\").Last())
-                    .Open();
-				dbelectoraleventzipfilestream.CopyTo(dbelectoraleventziparchivestream);
-                dbelectoraleventzipfilestream.Close();
-                dbelectoraleventziparchivestream.Close();
+                ZipFile(dbelectoraleventpath);
+				GZipFile(dbelectoraleventpath);
 
-                File.Delete(dbelectoraleventzip);
                 File.Delete(dbelectoraleventpath);
                 File.Delete(txtelectoraleventpath);
-            }
+			}
 
-            #endregion
+			#endregion
 
-            sqliteConnection.Close();
+			logfilestream.Close();
+			sqliteConnection.Close();
 
-            logfilestream.Close();
-            using FileStream logstream = File.Open(logpath, FileMode.OpenOrCreate);
-            using Stream logziparchivedbstream = iecziparchive.CreateEntry(logname).Open();
-            logstream.CopyTo(logziparchivedbstream);
-            logstream.Close();
-            logziparchivedbstream.Close();
+			ZipFile(dbpath);
+            GZipFile(dbpath);
+			ZipFile(logpath);
 
+			File.Delete(dbpath);
 			File.Delete(logpath);
-
-			string dbzip = ZipFile(dbpath);
-			using FileStream dbzipfilestream = File.OpenRead(dbzip);
-			using Stream dbziparchivestream = iecziparchive
-				.CreateEntry(dbzip.Split("\\").Last())
-				.Open();
-			dbzipfilestream.CopyTo(dbziparchivestream);
-			dbzipfilestream.Close();
-			dbziparchivestream.Close();
-
-            File.Delete(dbzip);
-            File.Delete(dbpath);
-        }
+		}
 
         public static SQLiteConnection SQLiteConnection(string path, bool individual)
         {
@@ -862,7 +837,18 @@ namespace DataProcessor
 
             return zipfilepath;
         }
-        public static void PksToText(string path, CSVParameters parameters)
+		public static string GZipFile(string filepath)
+		{
+			string gzipfilepath = filepath + ".gz";
+
+			using FileStream filestream = File.OpenRead(filepath);
+			using FileStream filestreamgzip = File.Create(gzipfilepath);
+			
+            GZip.Compress(filestream, filestreamgzip, true, 512, 6);
+
+			return gzipfilepath;
+		}
+		public static void PksToText(string path, CSVParameters parameters)
         {
             if (File.Exists(path)) File.Delete(path);
 
