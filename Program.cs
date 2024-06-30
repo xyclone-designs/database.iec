@@ -896,7 +896,7 @@ namespace DataProcessor
         }
         public static string ElectoralEventPath(string basedirectory, ElectoralEvent electoralevent, string extension, out string filename)
         {
-            return Path.Combine(basedirectory, filename = string.Format("iec.{0}.{1}", electoralevent.pk switch
+            return Path.Combine(basedirectory, filename = string.Format("iec.{0}.[{1}].{2}", electoralevent.pk, electoralevent.pk switch
             {
                 01 => "NE.1994",
                 02 => "PE.1994",
