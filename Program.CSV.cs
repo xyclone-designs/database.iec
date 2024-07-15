@@ -102,11 +102,11 @@ namespace DataProcessor
                     {
                         if (rowsorderedenumerator.Current.MunicipalityName is null)
                             currentMunicipality = null;
-                        else if (currentMunicipality is null || currentMunicipality.name != rowsorderedenumerator.Current.MunicipalityName)
-                        {
-                            if (parameters.Municipalities.Find(municipality => municipality.name == rowsorderedenumerator.Current.MunicipalityName) is Municipality municipality)
-                                currentMunicipality = municipality;
-                            else if (sqliteConnection.Table<Municipality>().FirstOrDefault(_ => _.name == rowsorderedenumerator.Current.MunicipalityName) is Municipality municipalitysql)
+						else if (currentMunicipality is null || string.Equals(currentMunicipality.name, rowsorderedenumerator.Current.MunicipalityName, StringComparison.OrdinalIgnoreCase) is false)
+						{
+							if (parameters.Municipalities.Find(_ => string.Equals(_.name, rowsorderedenumerator.Current.MunicipalityName, StringComparison.OrdinalIgnoreCase)) is Municipality municipality)
+								currentMunicipality = municipality;
+							else if (sqliteConnection.Table<Municipality>().AsEnumerable().FirstOrDefault(_ => _.name == rowsorderedenumerator.Current.MunicipalityName) is Municipality municipalitysql)
                             {
                                 currentMunicipality = municipalitysql;
                                 parameters.Municipalities.Add(municipalitysql);
@@ -117,11 +117,11 @@ namespace DataProcessor
                     {
                         if (rowsorderedenumerator.Current.MunicipalityGeo is null)
                             currentMunicipality = null;
-                        else if (currentMunicipality is null || currentMunicipality.geoCode != rowsorderedenumerator.Current.MunicipalityGeo)
+                        else if (currentMunicipality is null || string.Equals(currentMunicipality.geoCode, rowsorderedenumerator.Current.MunicipalityGeo, StringComparison.OrdinalIgnoreCase) is false)
                         {
-                            if (parameters.Municipalities.Find(municipality => municipality.geoCode == rowsorderedenumerator.Current.MunicipalityGeo) is Municipality municipality)
+                            if (parameters.Municipalities.Find(_ => string.Equals(_.geoCode, rowsorderedenumerator.Current.MunicipalityGeo, StringComparison.OrdinalIgnoreCase)) is Municipality municipality)
                                 currentMunicipality = municipality;
-                            else if (sqliteConnection.Table<Municipality>().FirstOrDefault(_ => _.geoCode == rowsorderedenumerator.Current.MunicipalityGeo) is Municipality municipalitysql)
+                            else if (sqliteConnection.Table<Municipality>().AsEnumerable().FirstOrDefault(_ => string.Equals(_.geoCode, rowsorderedenumerator.Current.MunicipalityGeo, StringComparison.OrdinalIgnoreCase)) is Municipality municipalitysql)
                             {
                                 currentMunicipality = municipalitysql;
                                 parameters.Municipalities.Add(municipalitysql);
@@ -168,11 +168,11 @@ namespace DataProcessor
 
                 if (rowsorderedenumerator.Current.PartyName is null)
                     currentParty = null;
-                else if (currentParty is null || currentParty.name != rowsorderedenumerator.Current.PartyName)
+                else if (currentParty is null || string.Equals(currentParty.name, rowsorderedenumerator.Current.PartyName, StringComparison.OrdinalIgnoreCase) is false)
                 {
-                    if (parameters.Parties.Find(party => party.name == rowsorderedenumerator.Current.PartyName) is Party party)
+                    if (parameters.Parties.Find(party => string.Equals(party.name, rowsorderedenumerator.Current.PartyName, StringComparison.OrdinalIgnoreCase)) is Party party)
                         currentParty = party;
-                    else if (sqliteConnection.Table<Party>().FirstOrDefault(_ => _.name == rowsorderedenumerator.Current.PartyName) is Party partysql)
+                    else if (sqliteConnection.Table<Party>().AsEnumerable().FirstOrDefault(_ => string.Equals(_.name, rowsorderedenumerator.Current.PartyName, StringComparison.OrdinalIgnoreCase)) is Party partysql)
                     {
                         currentParty = partysql;
                         parameters.Parties.Add(partysql);

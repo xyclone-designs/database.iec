@@ -55,7 +55,7 @@ namespace DataProcessor
 			foreach (Ballot ballotmunicipality in ballotsmunicipality)
 			{
 				Municipality municipality = sqliteConnection.Find<Municipality>(ballotmunicipality.pkMunicipality);
-				TXLSSeats? txlsseats = seats.FirstOrDefault(_seat => _seat.MunicipalityGeo == municipality?.geoCode);
+				TXLSSeats? txlsseats = seats.FirstOrDefault(_seat => string.Equals(_seat.MunicipalityGeo, municipality?.geoCode, StringComparison.OrdinalIgnoreCase));
 
                 if (txlsseats?.Rows != null)
                     foreach (TXLSSeatsRow txlsseatsrow in txlsseats.Rows)
@@ -76,7 +76,7 @@ namespace DataProcessor
 
 						if (PartySeats.HasValue)
 						{
-                            Party party = sqliteConnection.Table<Party>().First(_party => _party.name == PartyName);
+                            Party party = sqliteConnection.Table<Party>().AsEnumerable().First(_party => string.Equals(_party.name, PartyName, StringComparison.OrdinalIgnoreCase));
 
 							ballotmunicipality.list_pkParty_seats = ElectionsItem.AddPKPairIfUnique(ballotmunicipality.list_pkParty_seats, party.pk, PartySeats.Value, true);
 							if (ballotmunicipalitypr is not null && ballotmunicipality.type!.Contains("pr"))

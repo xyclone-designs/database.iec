@@ -26,7 +26,7 @@ namespace System.IO.Compression
             {
 				foreach (IGrouping<string, string[]> grouped in Read().GroupBy(_ => _[0]))
 				{
-					// electoralevent,abbr,date,designation,party,allocation
+					// name,abbr,date,designation,party,allocation
 
 					IEnumerable<string> allocations = grouped
 						.Where(allocationline =>
@@ -50,9 +50,11 @@ namespace System.IO.Compression
 						pk = CSVRow.Utils.RowToElectoralEvent(grouped.First()[0]) ?? throw new Exception(),
 						abbr = grouped.First()[1],
 						date = grouped.First()[2],
+						name = grouped.First()[0],
 						type = ElectoralEvent.Type(grouped.Key),
 						list_pkParty_designation_nationalAllocation = ElectoralEvent.IsNational(grouped.Key) ? string.Join(',', allocations) : null,
 						list_pkParty_idProvince_provincialAllocation = ElectoralEvent.IsProvincial(grouped.Key) ? string.Join(',', allocations) : null,
+						list_pkParty_idProvince_regionalAllocation = ElectoralEvent.IsRegional(grouped.Key) ? string.Join(',', allocations) : null,
 					};
 				}
 			}

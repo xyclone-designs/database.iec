@@ -71,7 +71,7 @@ namespace SQLite
 				{
 					return string.IsNullOrWhiteSpace(name) is false && name != "0" && sqliteConnection
 						.Table<Party>()
-						.Any(party => string.Equals(name, party.name)) is false;
+						.Any(party => string.Equals(name, party.name, StringComparison.OrdinalIgnoreCase)) is false;
 
 				}).Select(name => new Party
 				{

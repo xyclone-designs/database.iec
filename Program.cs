@@ -673,7 +673,7 @@ namespace DataProcessor
 				Console.WriteLine("RE2024");
 
 				ElectoralEvent RE2024ElectoralEvent = electoralevents.First(_ => RE2024.IsElectoralEvent(_));
-				List<RE2024> RE2024Rows = UtilsCSVRows<RE2024>(logstreamwriter, datazip.Entries.First(entry => entry.FullName.EndsWith("2024 PE.csv")).Open())
+				List<RE2024> RE2024Rows = UtilsCSVRows<RE2024>(logstreamwriter, datazip.Entries.First(entry => entry.FullName.EndsWith("2024 RE.csv")).Open())
 					.Where(_ => _.Line is null || _.Line.Contains("Out of Country") is false)
 					.ToList();
 
@@ -896,7 +896,7 @@ namespace DataProcessor
         }
         public static string ElectoralEventPath(string basedirectory, ElectoralEvent electoralevent, string extension, out string filename)
         {
-            return Path.Combine(basedirectory, filename = string.Format("iec.{0}.[{1}].{2}", electoralevent.pk, electoralevent.pk switch
+			return Path.Combine(basedirectory, filename = string.Format("iec.{0}.[{1}].{2}", electoralevent.pk switch
             {
                 01 => "NE.1994",
                 02 => "PE.1994",
@@ -921,7 +921,7 @@ namespace DataProcessor
 
                 _ => throw new Exception(string.Format("Electoral Event PK '{0}' ?", electoralevent.pk))
 
-            }, extension));
+            }, electoralevent.pk, extension));
         }
         public static void ElectoralEventLGEUpdate(SQLiteConnection sqliteconnection, ElectoralEvent electoralevent, IEnumerable<Ballot> ballots)
         {
