@@ -40,4 +40,4 @@ Party information list was generated from data, wikipedia and following links
 
 # Disclaimer
 
-Xyclone Designs and The Independent Electoral Commission of South Africa (IEC) are in no way affiliated with one another. All data used was curated from public sources not limited to but including the IEC results website listed below. Visit the Github link below to see program used to create database from said data. Data is subject to inacuracies and constant changes and Xyclone Designs will not be liable for use of the data in any form.
+Xyclone Designs and The Independent Electoral Commission of South Africa (IEC) are in no way affiliated with one another. All data used was curated from public sources not limited to but including the IEC results website listed above. Data is subject to inacuracies and constant changes and Xyclone Designs will not be liable for use of the data in any form.
