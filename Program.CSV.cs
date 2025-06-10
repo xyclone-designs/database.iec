@@ -7,14 +7,32 @@ using System;
 using System.Data;
 using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 
 namespace DataProcessor
 {
     internal partial class Program
     {
-        public static void CSV<TCSVRow>(SQLiteConnection sqliteConnection, StreamWriter log, ElectoralEvent electoralEvent, IEnumerable<TCSVRow> rows, CSVParameters parameters) where TCSVRow : CSVRow
+		public class CSVParameters
+		{
+			public List<Ballot>? Ballots { get; set; }
+			public List<Ballot>? BallotsElectoralEvent { get; set; }
+			public List<BallotIndividual>? BallotsIndividual { get; set; }
+			public List<ElectoralEvent>? ElectoralEvents { get; set; }
+			public List<ElectoralEventIndividual>? ElectoralEventsIndividual { get; set; }
+			public List<Party>? Parties { get; set; }
+			public List<PartyIndividual>? PartiesIndividual { get; set; }
+			public List<Province>? Provinces { get; set; }
+			public List<ProvinceIndividual>? ProvincesIndividual { get; set; }
+			public List<Municipality>? Municipalities { get; set; }
+			public List<MunicipalityIndividual>? MunicipalitiesIndividual { get; set; }
+			public List<VotingDistrict>? VotingDistricts { get; set; }
+			public List<VotingDistrictIndividual>? VotingDistrictsIndividual { get; set; }
+			public List<Ward>? Wards { get; set; }
+			public List<WardIndividual>? WardsIndividual { get; set; }
+		}
+
+		public static void CSV<TCSVRow>(SQLiteConnection sqliteConnection, StreamWriter log, ElectoralEvent electoralEvent, IEnumerable<TCSVRow> rows, CSVParameters parameters) where TCSVRow : CSVRow
         {
             parameters.Ballots = [];
             parameters.BallotsElectoralEvent = [];

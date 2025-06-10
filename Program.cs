@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 
 namespace DataProcessor
 {
@@ -70,6 +71,7 @@ namespace DataProcessor
 			datazip.ReadDataAllocations(sqliteConnection, logstreamwriter);
 			datazip.ReadDataMunicipalities(sqliteConnection, logstreamwriter);
 
+            JArray apifiles = [];
             List<ElectoralEvent> electoralevents = [.. sqliteConnection.Table<ElectoralEvent>()];
 			CSVParameters parameters = new()
             {
@@ -89,7 +91,7 @@ namespace DataProcessor
                 ElectoralEvent NE1994ElectoralEvent = electoralevents.First(_ => NE1994.IsElectoralEvent(_));
                 List<NE1994> NE1994Rows = NE1994.Rows().ToList();
 
-                Console.WriteLine("NE1994 - New Parties"); parameters.Parties = sqliteConnection.CSVNewParties(logstreamwriter, NE1994Rows);
+				Console.WriteLine("NE1994 - New Parties"); parameters.Parties = sqliteConnection.CSVNewParties(logstreamwriter, NE1994Rows);
                 Console.WriteLine("NE1994 - New Municipalities"); parameters.Municipalities = sqliteConnection.CSVNewMunicipalities(logstreamwriter, NE1994Rows);
                 Console.WriteLine("NE1994 - New Voting Districts"); parameters.VotingDistricts = sqliteConnection.CSVNewVotingDistricts(logstreamwriter, NE1994Rows);
                 Console.WriteLine("NE1994 - New Wards"); parameters.Wards = sqliteConnection.CSVNewWards(logstreamwriter, NE1994Rows);
@@ -101,14 +103,14 @@ namespace DataProcessor
                     .Where(ballot => ballot.pkElectoralEvent == NE1994ElectoralEvent.pk)
                     .Select(ballot => new BallotIndividual(ballot));
 
-                string NE1994dbpath = ElectoralEventPath(directory, NE1994ElectoralEvent, "db");
+				string NE1994dbpath = ElectoralEventPath(directory, NE1994ElectoralEvent, "db");
                 string NE1994txtpath = ElectoralEventPath(directory, NE1994ElectoralEvent, "txt");
 
                 PksToText(NE1994txtpath, parameters);
                 using SQLiteConnection connectionNE1994 = SQLiteConnection(NE1994dbpath, true);
                 connectionNE1994.InsertAll(ballotsindividual);
-                connectionNE1994.Close();
-            }
+                connectionNE1994.Close();   
+			}
 
             // 1994 Provincial
             if (pksElectoralEvent.Contains(02))
@@ -772,10 +774,13 @@ namespace DataProcessor
                 sqliteconnectionelectoralevent.InsertAll(parameters.WardsIndividual);
                 sqliteconnectionelectoralevent.Close();
 
-                ZipFile(dbelectoraleventpath);
-				GZipFile(dbelectoraleventpath);
+                string dbzipfilename = ZipFile(dbelectoraleventpath);
+				string dbgzipfilename = GZipFile(dbelectoraleventpath);
 
-                File.Delete(dbelectoraleventpath);
+				apifiles.Add(dbzipfilename.Split('\\').Last(), electoralevent);
+				apifiles.Add(dbgzipfilename.Split('\\').Last(), electoralevent);
+
+				File.Delete(dbelectoraleventpath);
                 File.Delete(txtelectoraleventpath);
 			}
 
@@ -784,8 +789,22 @@ namespace DataProcessor
 			logfilestream.Close();
 			sqliteConnection.Close();
 
-			ZipFile(dbpath);
-            GZipFile(dbpath);
+			string zipfilename = ZipFile(dbpath);
+            string gzipfilename = GZipFile(dbpath);
+
+			apifiles.Add(zipfilename.Split('\\').Last(), null);
+			apifiles.Add(gzipfilename.Split('\\').Last(), null);
+
+			string apifilesjson = apifiles.ToString();
+			string apifilespath = Path.Combine(directory, "index.json");
+
+			using FileStream apifilesfilestream = File.OpenWrite(apifilespath);
+			using StreamWriter apifilesstreamwriter = new(apifilesfilestream);
+
+			apifilesstreamwriter.Write(apifilesjson);
+			apifilesstreamwriter.Close();
+			apifilesfilestream.Close();
+
 			ZipFile(logpath);
 
 			File.Delete(dbpath);
@@ -1023,24 +1042,35 @@ namespace DataProcessor
 
             return change;
         }
-
-		public class CSVParameters
-        {
-            public List<Ballot>? Ballots { get; set; }
-            public List<Ballot>? BallotsElectoralEvent { get; set; }
-            public List<BallotIndividual>? BallotsIndividual { get; set; }
-            public List<ElectoralEvent>? ElectoralEvents { get; set; }
-            public List<ElectoralEventIndividual>? ElectoralEventsIndividual { get; set; }
-            public List<Party>? Parties { get; set; }
-            public List<PartyIndividual>? PartiesIndividual { get; set; }
-            public List<Province>? Provinces { get; set; }
-            public List<ProvinceIndividual>? ProvincesIndividual { get; set; }
-            public List<Municipality>? Municipalities { get; set; }
-            public List<MunicipalityIndividual>? MunicipalitiesIndividual { get; set; }
-            public List<VotingDistrict>? VotingDistricts { get; set; }
-            public List<VotingDistrictIndividual>? VotingDistrictsIndividual { get; set; }
-            public List<Ward>? Wards { get; set; }
-            public List<WardIndividual>? WardsIndividual { get; set; }
-        }
     }
+
+	public static class Extensions
+	{
+		public static void Add(this JArray jarray, string filename, ElectoralEvent? electoralevent)
+		{
+			string description = filename.Split('.').Last() switch
+			{
+				"zip" => "zipped ",
+				"gz" => "g-zipped ",
+
+				_ => string.Empty
+			};
+
+			jarray.Add(new JObject
+			{
+				{ "DateCreated", DateTime.Now.ToString("dd-MM-yyyy") },
+				{ "DateEdited", DateTime.Now.ToString("dd-MM-yyyy") },
+				{ "Name", filename.Split('/').Last() },
+				{ "Url", string.Format("https://raw.githubusercontent.com/xyclone-designs/database.iec/refs/heads/main/.output/{0}", filename) },
+				{ "Description", true switch
+					{
+						true when electoralevent is not null
+							=> string.Format("individual {0}database for {1} elections held on {2}", description, electoralevent.type, electoralevent.date),
+
+						_ => string.Format("{0}database", description)
+					}
+				}
+			});
+		}
+	}
 }
