@@ -1,88 +1,85 @@
-﻿using DataProcessor.CSVs;
-using DataProcessor.Tables;
-
-using SQLite;
+﻿using SQLite;
 
 using System;
 using System.Data;
 using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
 using System.Linq;
 
-namespace DataProcessor
+using XycloneDesigns.Database.IEC.Tables;
+
+namespace Database.IEC
 {
     internal partial class Program
     {
         public static void XLS<TXLSSeats, TXLSSeatsRow>(SQLiteConnection sqliteConnection, ElectoralEvent electoralEvent, IEnumerable<TXLSSeats> seats) 
-            where TXLSSeatsRow : XLSs.XLSSeatsRow 
-            where TXLSSeats : XLSs.XLSSeats<TXLSSeatsRow>
+            where TXLSSeatsRow : Inputs.XLSs.XLSSeatsRow 
+            where TXLSSeats : Inputs.XLSs.XLSSeats<TXLSSeatsRow>
 		{
 			Ballot ballotmunicipalitypr = sqliteConnection.Table<Ballot>()
 				.First(ballot =>
-					ballot.type != null &&
-					ballot.type.Contains("pr") &&
-					ballot.pkElectoralEvent == electoralEvent.pk &&
-					ballot.pkProvince == null &&
-					ballot.pkMunicipality == null &&
-					ballot.pkVotingDistrict == null &&
-					ballot.pkWard == null);
+					ballot.Type != null &&
+					ballot.Type.Contains("pr") &&
+					ballot.PkElectoralEvent == electoralEvent.Pk &&
+					ballot.PkProvince == null &&
+					ballot.PkMunicipality == null &&
+					ballot.PkVotingDistrict == null &&
+					ballot.PkWard == null);
 			Ballot ballotmunicipalityward = sqliteConnection.Table<Ballot>()
 				.First(ballot =>
-					ballot.type != null &&
-					ballot.type.Contains("ward") &&
-					ballot.pkElectoralEvent == electoralEvent.pk &&
-					ballot.pkProvince == null &&
-					ballot.pkMunicipality == null &&
-					ballot.pkVotingDistrict == null &&
-					ballot.pkWard == null);
+					ballot.Type != null &&
+					ballot.Type.Contains("ward") &&
+					ballot.PkElectoralEvent == electoralEvent.Pk &&
+					ballot.PkProvince == null &&
+					ballot.PkMunicipality == null &&
+					ballot.PkVotingDistrict == null &&
+					ballot.PkWard == null);
 			List<Ballot> ballotsmunicipality = sqliteConnection.Table<Ballot>()
 				.Where(ballot =>
-					ballot.type != null &&
-					(ballot.type.Contains("pr") || ballot.type.Contains("ward")) &&
-					ballot.pkElectoralEvent == electoralEvent.pk &&
-					ballot.pkProvince != null &&
-					ballot.pkMunicipality != null &&
-					ballot.pkVotingDistrict == null &&
-					ballot.pkWard == null)
+					ballot.Type != null &&
+					(ballot.Type.Contains("pr") || ballot.Type.Contains("ward")) &&
+					ballot.PkElectoralEvent == electoralEvent.Pk &&
+					ballot.PkProvince != null &&
+					ballot.PkMunicipality != null &&
+					ballot.PkVotingDistrict == null &&
+					ballot.PkWard == null)
                 .ToList();
 
-            ballotmunicipalitypr.list_pkParty_seats = null;
-			ballotmunicipalityward.list_pkParty_seats = null;
+            ballotmunicipalitypr.List_PkParty_Seats = null;
+			ballotmunicipalityward.List_PkParty_Seats = null;
             foreach (Ballot ballotmunicipality in ballotsmunicipality)
-				ballotmunicipality.list_pkParty_seats = null;
+				ballotmunicipality.List_PkParty_Seats = null;
 
 			foreach (Ballot ballotmunicipality in ballotsmunicipality)
 			{
-				Municipality municipality = sqliteConnection.Find<Municipality>(ballotmunicipality.pkMunicipality);
-				TXLSSeats? txlsseats = seats.FirstOrDefault(_seat => string.Equals(_seat.MunicipalityGeo, municipality?.geoCode, StringComparison.OrdinalIgnoreCase));
+				Municipality municipality = sqliteConnection.Find<Municipality>(ballotmunicipality.PkMunicipality);
+				TXLSSeats? txlsseats = seats.FirstOrDefault(_seat => string.Equals(_seat.MunicipalityGeo, municipality?.GeoCode, StringComparison.OrdinalIgnoreCase));
 
                 if (txlsseats?.Rows != null)
                     foreach (TXLSSeatsRow txlsseatsrow in txlsseats.Rows)
                     {
                         bool 
-                            isPr = ballotmunicipality.type!.Contains("pr"),
-                            isWard = ballotmunicipality.type!.Contains("ward");
+                            isPr = ballotmunicipality.Type!.Contains("pr"),
+                            isWard = ballotmunicipality.Type!.Contains("ward");
 
                         (int? PartySeats, string? PartyName) = true switch
 						{
-							true when txlsseatsrow is XLSs.XLSSeatsLGE1Row xlsseatslge1row && isPr => ((int?)xlsseatslge1row.PRListSeats, xlsseatslge1row.PartyName),
-                            true when txlsseatsrow is XLSs.XLSSeatsLGE1Row xlsseatslge1row && isWard => ((int?)xlsseatslge1row.WardSeats, xlsseatslge1row.PartyName),
-                            true when txlsseatsrow is XLSs.XLSSeatsLGE2Row xlsseatslge2row => ((int?)xlsseatslge2row.TotalPartySeats, xlsseatslge2row.PartyName),
-                            true when txlsseatsrow is XLSs.XLSSeatsLGE3Row xlsseatslge3row => ((int?)xlsseatslge3row.TotalPartySeats, xlsseatslge3row.PartyName),
+							true when txlsseatsrow is Inputs.XLSs.XLSSeatsLGE1Row xlsseatslge1row && isPr => ((int?)xlsseatslge1row.PRListSeats, xlsseatslge1row.PartyName),
+                            true when txlsseatsrow is Inputs.XLSs.XLSSeatsLGE1Row xlsseatslge1row && isWard => ((int?)xlsseatslge1row.WardSeats, xlsseatslge1row.PartyName),
+                            true when txlsseatsrow is Inputs.XLSs.XLSSeatsLGE2Row xlsseatslge2row => ((int?)xlsseatslge2row.TotalPartySeats, xlsseatslge2row.PartyName),
+                            true when txlsseatsrow is Inputs.XLSs.XLSSeatsLGE3Row xlsseatslge3row => ((int?)xlsseatslge3row.TotalPartySeats, xlsseatslge3row.PartyName),
 
                             _ => (new int?(), null)
                         };
 
 						if (PartySeats.HasValue)
 						{
-                            Party party = sqliteConnection.Table<Party>().AsEnumerable().First(_party => string.Equals(_party.name, PartyName, StringComparison.OrdinalIgnoreCase));
+                            Party party = sqliteConnection.Table<Party>().AsEnumerable().First(_party => string.Equals(_party.Name, PartyName, StringComparison.OrdinalIgnoreCase));
 
-							ballotmunicipality.list_pkParty_seats = ElectionsItem.AddPKPairIfUnique(ballotmunicipality.list_pkParty_seats, party.pk, PartySeats.Value, true);
-							if (ballotmunicipalitypr is not null && ballotmunicipality.type!.Contains("pr"))
-								ballotmunicipalitypr.list_pkParty_seats = ElectionsItem.AddPKPairIfUnique(ballotmunicipalitypr.list_pkParty_seats, party.pk, PartySeats.Value, true);
-							if (ballotmunicipalityward is not null && ballotmunicipality.type!.Contains("ward"))
-								ballotmunicipalityward.list_pkParty_seats = ElectionsItem.AddPKPairIfUnique(ballotmunicipalityward.list_pkParty_seats, party.pk, PartySeats.Value, true);
+							ballotmunicipality.List_PkParty_Seats = ElectionsItem.AddPKPairIfUnique(ballotmunicipality.List_PkParty_Seats, party.Pk, PartySeats.Value, true);
+							if (ballotmunicipalitypr is not null && ballotmunicipality.Type!.Contains("pr"))
+								ballotmunicipalitypr.List_PkParty_Seats = ElectionsItem.AddPKPairIfUnique(ballotmunicipalitypr.List_PkParty_Seats, party.Pk, PartySeats.Value, true);
+							if (ballotmunicipalityward is not null && ballotmunicipality.Type!.Contains("ward"))
+								ballotmunicipalityward.List_PkParty_Seats = ElectionsItem.AddPKPairIfUnique(ballotmunicipalityward.List_PkParty_Seats, party.Pk, PartySeats.Value, true);
 						}
 					}
 			}

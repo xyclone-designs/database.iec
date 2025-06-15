@@ -1,11 +1,12 @@
-﻿using DataProcessor.CSVs;
-using DataProcessor.Tables;
-using DataProcessor.Utils;
+﻿using Database.IEC.Inputs.CSVs;
+using Database.IEC.Utils;
 
 using SQLite;
 
 using System.Collections.Generic;
 using System.Linq;
+
+using XycloneDesigns.Database.IEC.Tables;
 
 namespace System.IO.Compression
 {
@@ -26,7 +27,7 @@ namespace System.IO.Compression
             {
 				foreach (IGrouping<string, string[]> grouped in Read().GroupBy(_ => _[0]))
 				{
-					// name,abbr,date,designation,party,allocation
+					// Name,abbr,date,designation,party,allocation
 
 					IEnumerable<string> allocations = grouped
 						.Where(allocationline =>
@@ -39,22 +40,22 @@ namespace System.IO.Compression
 						.Select(allocationline =>
 						{
                             Party party = ((IEnumerable<Party>)sqliteConnection.Table<Party>())
-								.Single(_party => string.Equals(_party.name, allocationline[4], StringComparison.OrdinalIgnoreCase));
+								.Single(_party => string.Equals(_party.Name, allocationline[4], StringComparison.OrdinalIgnoreCase));
 
-							return string.Format("{0}:{1}:{2}", party.pk, allocationline[3], allocationline[5]);
+							return string.Format("{0}:{1}:{2}", party.Pk, allocationline[3], allocationline[5]);
 						
                         });
 
 					yield return new ElectoralEvent
 					{
-						pk = CSVRow.Utils.RowToElectoralEvent(grouped.First()[0]) ?? throw new Exception(),
-						abbr = grouped.First()[1],
-						date = grouped.First()[2],
-						name = grouped.First()[0],
-						type = ElectoralEvent.Type(grouped.Key),
-						list_pkParty_designation_nationalAllocation = ElectoralEvent.IsNational(grouped.Key) ? string.Join(',', allocations) : null,
-						list_pkParty_idProvince_provincialAllocation = ElectoralEvent.IsProvincial(grouped.Key) ? string.Join(',', allocations) : null,
-						list_pkParty_idProvince_regionalAllocation = ElectoralEvent.IsRegional(grouped.Key) ? string.Join(',', allocations) : null,
+						Pk = CSVRow.Utils.RowToElectoralEvent(grouped.First()[0]) ?? throw new Exception(),
+						Abbr = grouped.First()[1],
+						Date = grouped.First()[2],
+						Name = grouped.First()[0],
+						Type = ElectoralEvent.ToType(grouped.Key),
+						List_PkParty_Designation_NationalAllocation = ElectoralEvent.IsNational(grouped.Key) ? string.Join(',', allocations) : null,
+						List_PkParty_IdProvince_ProvincialAllocation = ElectoralEvent.IsProvincial(grouped.Key) ? string.Join(',', allocations) : null,
+						List_PkParty_IdProvince_RegionalAllocation = ElectoralEvent.IsRegional(grouped.Key) ? string.Join(',', allocations) : null,
 					};
 				}
 			}
@@ -69,10 +70,10 @@ namespace System.IO.Compression
             sqliteConnection.InsertAll(Enumerable.Empty<Municipality>()
                 .Concat(geographies)
                 .Concat(members)
-				.DistinctBy(municipality => municipality.geoCode)
-                .OrderBy(municipality => municipality.geoCode)
-                .ThenBy(municipality => municipality.name)
-                .ThenBy(municipality => municipality.nameLong));
+				.DistinctBy(municipality => municipality.GeoCode)
+                .OrderBy(municipality => municipality.GeoCode)
+                .ThenBy(municipality => municipality.Name)
+                .ThenBy(municipality => municipality.NameLong));
         }
         public static void ReadDataProvinces(this ZipArchive zipArchive, SQLiteConnection sqliteConnection, StreamWriter log)
         {
@@ -88,14 +89,14 @@ namespace System.IO.Compression
 
 			sqliteConnection.InsertAll(Rows().Select(row => new Province
 			{
-				// id,name,capital,population,squareKms,urlWebsite
+				// Id,Name,capital,population,squareKms,urlWebsite
 
-				id = row[0],
-				name = row[1],
-				capital = row[2],
-				population = int.Parse(row[3]),
-				squareKms = int.Parse(row[4]),
-				urlWebsite = row[5],
+				Id = row[0],
+				Name = row[1],
+				Capital = row[2],
+				Population = int.Parse(row[3]),
+				SquareKms = int.Parse(row[4]),
+				UrlWebsite = row[5],
 			}));
         }
         public static void ReadDataParties(this ZipArchive zipArchive, SQLiteConnection sqliteConnection, StreamWriter log)
@@ -116,14 +117,14 @@ namespace System.IO.Compression
 				
 				parties.Add(new Party
 				{
-					// name,abbr,color,headquarters,urlLogo,urlWebsite
+					// Name,abbr,color,headquarters,urlLogo,urlWebsite
 
-					name = string.Equals("{placeholder}", columns[0]) is false ? columns[0] : null,
-					abbr = string.Equals("{placeholder}", columns[1]) is false ? columns[1] : null,
-					color = string.Equals("{placeholder}", columns[2]) is false ? columns[2] : null,
-					headquarters = string.Equals("{placeholder}", columns[3]) is false ? columns[3] : null,
-					urlLogo = string.Equals("{placeholder}", columns[4]) is false ? columns[4] : null,
-					urlWebsite = string.Equals("{placeholder}", columns[5]) is false ? columns[5] : null,
+					Name = string.Equals("{placeholder}", columns[0]) is false ? columns[0] : null,
+					Abbr = string.Equals("{placeholder}", columns[1]) is false ? columns[1] : null,
+					Color = string.Equals("{placeholder}", columns[2]) is false ? columns[2] : null,
+					Headquarters = string.Equals("{placeholder}", columns[3]) is false ? columns[3] : null,
+					UrlLogo = string.Equals("{placeholder}", columns[4]) is false ? columns[4] : null,
+					UrlWebsite = string.Equals("{placeholder}", columns[5]) is false ? columns[5] : null,
 				});
 			}
 

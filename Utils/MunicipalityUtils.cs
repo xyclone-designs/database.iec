@@ -1,6 +1,4 @@
-﻿using DataProcessor.Tables;
-
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json.Linq;
 
 using System;
 using System.Collections.Generic;
@@ -10,11 +8,13 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace DataProcessor.Utils
+using XycloneDesigns.Database.IEC.Tables;
+
+namespace Database.IEC.Utils
 {
 	public class MunicipalityUtils
 	{
-		public static int? ProvinceFromMunicipality(string? geocode, string? name, string? namelong)
+		public static int? ProvinceFromMunicipality(string? geocode, string? Name, string? Namelong)
 		{
 			int? province = null;
 
@@ -36,32 +36,32 @@ namespace DataProcessor.Utils
 
 			province ??= true switch
 			{
-				true when name is null => new int?(),
-				true when name.Contains("Eastern Cape") => 1,
-				true when name.Contains("Free State") => 2,
-				true when name.Contains("Gauteng") => 3,
-				true when name.Contains("KwaZulu-Natal") => 4,
-				true when name.Contains("Limpopo") => 5,
-				true when name.Contains("Mpumalanga") => 6,
-				true when name.Contains("Northern Cape") => 7,
-				true when name.Contains("North West") => 8,
-				true when name.Contains("Western Cape") => 9,
+				true when Name is null => new int?(),
+				true when Name.Contains("Eastern Cape") => 1,
+				true when Name.Contains("Free State") => 2,
+				true when Name.Contains("Gauteng") => 3,
+				true when Name.Contains("KwaZulu-Natal") => 4,
+				true when Name.Contains("Limpopo") => 5,
+				true when Name.Contains("Mpumalanga") => 6,
+				true when Name.Contains("Northern Cape") => 7,
+				true when Name.Contains("North West") => 8,
+				true when Name.Contains("Western Cape") => 9,
 
 				_ => new int?()
 			};
 
 			province ??= true switch
 			{
-				true when namelong is null => new int?(),
-				true when namelong.Contains("Eastern Cape") => 1,
-				true when namelong.Contains("Free State") => 2,
-				true when namelong.Contains("Gauteng") => 3,
-				true when namelong.Contains("KwaZulu-Natal") => 4,
-				true when namelong.Contains("Limpopo") => 5,
-				true when namelong.Contains("Mpumalanga") => 6,
-				true when namelong.Contains("Northern Cape") => 7,
-				true when namelong.Contains("North West") => 8,
-				true when namelong.Contains("Western Cape") => 9,
+				true when Namelong is null => new int?(),
+				true when Namelong.Contains("Eastern Cape") => 1,
+				true when Namelong.Contains("Free State") => 2,
+				true when Namelong.Contains("Gauteng") => 3,
+				true when Namelong.Contains("KwaZulu-Natal") => 4,
+				true when Namelong.Contains("Limpopo") => 5,
+				true when Namelong.Contains("Mpumalanga") => 6,
+				true when Namelong.Contains("Northern Cape") => 7,
+				true when Namelong.Contains("North West") => 8,
+				true when Namelong.Contains("Western Cape") => 9,
 
 				_ => new int?()
 			};
@@ -129,12 +129,12 @@ namespace DataProcessor.Utils
                         "is_disestablished": true,
                         "geo_level": "municipality",
                         "geo_code": "EC103",
-                        "name": "Ikwezi",
-                        "long_name": "Ikwezi, Eastern Cape",
+                        "Name": "Ikwezi",
+                        "long_Name": "Ikwezi, Eastern Cape",
                         "square_kms": 4562.73,
                         "parent_level": "district",
                         "parent_code": "DC10",
-                        "province_name": "Eastern Cape",
+                        "province_Name": "Eastern Cape",
                         "province_code": "EC",
                         "category": "B",
                         "miif_category": "B3",
@@ -164,35 +164,35 @@ namespace DataProcessor.Utils
 					{
 						string?
 							geocode = jobject.Value<string>("geo_code"),
-							name = jobject.Value<string>("name"),
-							namelong = jobject.Value<string>("long_name")?.Replace("Kwazulu-Natal", "KwaZulu-Natal");
+							Name = jobject.Value<string>("Name"),
+							Namelong = jobject.Value<string>("long_Name")?.Replace("Kwazulu-Natal", "KwaZulu-Natal");
 
 						yield return new Municipality
 						{
-							name = name,
-							nameLong = namelong,
-							geoCode = geocode,
-							pkProvince = ProvinceFromMunicipality(geocode, name, namelong),
-							isDisestablished = jobject.Value<bool>("is_disestablished"),
-							squareKms = jobject.Value<decimal>("square_kms"),
-							geoLevel = jobject.Value<string>("geo_level"),
-							category = jobject.Value<string>("category"),
-							miifCategory = jobject.Value<string>("miif_category"),
-							population = jobject.Value<int>("population"),
-							addressPostal = string.Format(
+							Name = Name,
+							NameLong = Namelong,
+							GeoCode = geocode,
+							PkProvince = ProvinceFromMunicipality(geocode, Name, Namelong),
+							IsDisestablished = jobject.Value<bool>("is_disestablished"),
+							SquareKms = jobject.Value<decimal>("square_kms"),
+							GeoLevel = jobject.Value<string>("geo_level"),
+							Category = jobject.Value<string>("category"),
+							MiifCategory = jobject.Value<string>("miif_category"),
+							Population = jobject.Value<int>("population"),
+							AddressPostal = string.Format(
 								"{0}\n{1}\n{2}",
 								jobject.Value<string>("postal_address_1"),
 								jobject.Value<string>("postal_address_2"),
 								jobject.Value<string>("postal_address_3")),
-							addressStreet = string.Format(
+							AddressStreet = string.Format(
 								"{0}\n{1}\n{2}\n{3}",
 								jobject.Value<string>("street_address_1"),
 								jobject.Value<string>("street_address_2"),
 								jobject.Value<string>("street_address_3"),
 								jobject.Value<string>("street_address_4")),
-							numberPhone = jobject.Value<string>("phone_number"),
-							numberFax = jobject.Value<string>("fax_number"),
-							urlWebsite = jobject.Value<string>("url"),
+							NumberPhone = jobject.Value<string>("phone_number"),
+							NumberFax = jobject.Value<string>("fax_number"),
+							UrlWebsite = jobject.Value<string>("url"),
 						};
 					}
 				}
@@ -205,10 +205,10 @@ namespace DataProcessor.Utils
                     "data": [
                         {
                             "municipality.demarcation_code": "BUF",
-                            "municipality.name": "Buffalo City",
-                            "municipality.long_name": "Buffalo City, Eastern Cape",
+                            "municipality.Name": "Buffalo City",
+                            "municipality.long_Name": "Buffalo City, Eastern Cape",
                             "municipality.parent_code": "EC",
-                            "municipality.province_name": "Eastern Cape",
+                            "municipality.province_Name": "Eastern Cape",
                             "municipality.province_code": "EC",
                             "municipality.category": "A",
                             "municipality.miif_category": "A",
@@ -238,32 +238,32 @@ namespace DataProcessor.Utils
 					{
 						string?
 							geocode = jobject.Value<string>("municipality.demarcation_code"),
-							name = jobject.Value<string>("municipality.name"),
-							namelong = jobject.Value<string>("municipality.long_name")?.Replace("Kwazulu-Natal", "KwaZulu-Natal");
+							Name = jobject.Value<string>("municipality.Name"),
+							Namelong = jobject.Value<string>("municipality.long_Name")?.Replace("Kwazulu-Natal", "KwaZulu-Natal");
 
 						yield return new Municipality
 						{
-							name = name,
-							nameLong = namelong,
-							geoCode = geocode,
-							pkProvince = ProvinceFromMunicipality(geocode, name, namelong),
-							isDisestablished = false,
-							category = jobject.Value<string>("municipality.category"),
-							miifCategory = jobject.Value<string>("municipality.miif_category"),
-							addressPostal = string.Format(
+							Name = Name,
+							NameLong = Namelong,
+							GeoCode = geocode,
+							PkProvince = ProvinceFromMunicipality(geocode, Name, Namelong),
+							IsDisestablished = false,
+							Category = jobject.Value<string>("municipality.category"),
+							MiifCategory = jobject.Value<string>("municipality.miif_category"),
+							AddressPostal = string.Format(
 								"{0}\n{1}\n{2}",
 								jobject.Value<string>("municipality.postal_address_1"),
 								jobject.Value<string>("municipality.postal_address_2"),
 								jobject.Value<string>("municipality.postal_address_3")),
-							addressStreet = string.Format(
+							AddressStreet = string.Format(
 								"{0}\n{1}\n{2}\n{3}",
 								jobject.Value<string>("municipality.street_address_1"),
 								jobject.Value<string>("municipality.street_address_2"),
 								jobject.Value<string>("municipality.street_address_3"),
 								jobject.Value<string>("municipality.street_address_4")),
-							numberPhone = jobject.Value<string>("municipality.phone_number"),
-							numberFax = jobject.Value<string>("municipality.fax_number"),
-							urlWebsite = jobject.Value<string>("municipality.url"),
+							NumberPhone = jobject.Value<string>("municipality.phone_number"),
+							NumberFax = jobject.Value<string>("municipality.fax_number"),
+							UrlWebsite = jobject.Value<string>("municipality.url"),
 						};
 					}
 				}

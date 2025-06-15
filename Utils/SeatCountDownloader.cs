@@ -1,4 +1,4 @@
-﻿using DataProcessor.CSVs;
+﻿using Database.IEC.Inputs.CSVs;
 
 using System;
 using System.Collections.Generic;
@@ -7,7 +7,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace DataProcessor.Utils
+namespace Database.IEC.Utils
 {
 	public class SeatCountDownloader
 	{

@@ -1,5 +1,4 @@
-﻿using DataProcessor.CSVs;
-using DataProcessor.Tables;
+﻿using Database.IEC.Inputs.CSVs;
 
 using SQLite;
 
@@ -9,7 +8,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace DataProcessor
+using XycloneDesigns.Database.IEC.Tables;
+
+namespace Database.IEC
 {
     internal partial class Program
     {
@@ -17,19 +18,19 @@ namespace DataProcessor
 		{
 			public List<Ballot>? Ballots { get; set; }
 			public List<Ballot>? BallotsElectoralEvent { get; set; }
-			public List<BallotIndividual>? BallotsIndividual { get; set; }
+			public List<Ballot>? BallotsIndividual { get; set; }
 			public List<ElectoralEvent>? ElectoralEvents { get; set; }
-			public List<ElectoralEventIndividual>? ElectoralEventsIndividual { get; set; }
+			public List<ElectoralEvent>? ElectoralEventsIndividual { get; set; }
 			public List<Party>? Parties { get; set; }
-			public List<PartyIndividual>? PartiesIndividual { get; set; }
+			public List<Party>? PartiesIndividual { get; set; }
 			public List<Province>? Provinces { get; set; }
-			public List<ProvinceIndividual>? ProvincesIndividual { get; set; }
+			public List<Province>? ProvincesIndividual { get; set; }
 			public List<Municipality>? Municipalities { get; set; }
-			public List<MunicipalityIndividual>? MunicipalitiesIndividual { get; set; }
+			public List<Municipality>? MunicipalitiesIndividual { get; set; }
 			public List<VotingDistrict>? VotingDistricts { get; set; }
-			public List<VotingDistrictIndividual>? VotingDistrictsIndividual { get; set; }
+			public List<VotingDistrict>? VotingDistrictsIndividual { get; set; }
 			public List<Ward>? Wards { get; set; }
-			public List<WardIndividual>? WardsIndividual { get; set; }
+			public List<Ward>? WardsIndividual { get; set; }
 		}
 
 		public static void CSV<TCSVRow>(SQLiteConnection sqliteConnection, StreamWriter log, ElectoralEvent electoralEvent, IEnumerable<TCSVRow> rows, CSVParameters parameters) where TCSVRow : CSVRow
@@ -67,11 +68,11 @@ namespace DataProcessor
                 if (currentBallot is null || ChangeBallot(
                     rowsorderedenumerator.Current,
                     currentBallot,
-                    currentVotingDistrict?.id,
-                    currentWard?.id,
-                    typeof(TCSVRow) == typeof(NPE1999) ? currentMunicipality?.name : currentMunicipality?.geoCode))
+                    currentVotingDistrict?.Id,
+                    currentWard?.Id,
+                    typeof(TCSVRow) == typeof(NPE1999) ? currentMunicipality?.Name : currentMunicipality?.GeoCode))
                 {
-                    if (currentBallot?.pkElectoralEvent is not null)
+                    if (currentBallot?.PkElectoralEvent is not null)
                     {
                         parameters.Ballots.Add(currentBallot);
                         electoralEventBallot?.UpdateBallot(currentBallot);
@@ -79,11 +80,11 @@ namespace DataProcessor
 
                     if (rowsorderedenumerator.Current.GetWardId() is not string wardid)
                         currentWard = null;
-                    else if (currentWard is null || currentWard.id != wardid)
+                    else if (currentWard is null || currentWard.Id != wardid)
                     {
-                        if (parameters.Wards.Find(ward => ward.id == wardid) is Ward ward)
+                        if (parameters.Wards.Find(ward => ward.Id == wardid) is Ward ward)
                             currentWard = ward;
-                        else if (sqliteConnection.Table<Ward>().FirstOrDefault(_ => _.id == wardid) is Ward wardsql)
+                        else if (sqliteConnection.Table<Ward>().FirstOrDefault(_ => _.Id == wardid) is Ward wardsql)
                         {
                             currentWard = wardsql;
                             parameters.Wards.Add(currentWard);
@@ -92,11 +93,11 @@ namespace DataProcessor
 
                     if (rowsorderedenumerator.Current.ProvincePk is null)
                         currentProvince = null;
-                    else if (currentProvince is null || currentProvince.pk != rowsorderedenumerator.Current.ProvincePk)
+                    else if (currentProvince is null || currentProvince.Pk != rowsorderedenumerator.Current.ProvincePk)
                     {
-                        if (parameters.Provinces.Find(currentProvince => currentProvince.pk == rowsorderedenumerator.Current.ProvincePk) is Province Province)
+                        if (parameters.Provinces.Find(currentProvince => currentProvince.Pk == rowsorderedenumerator.Current.ProvincePk) is Province Province)
                             currentProvince = Province;
-                        else if (sqliteConnection.Table<Province>().FirstOrDefault(_ => _.pk == rowsorderedenumerator.Current.ProvincePk) is Province Provincesql)
+                        else if (sqliteConnection.Table<Province>().FirstOrDefault(_ => _.Pk == rowsorderedenumerator.Current.ProvincePk) is Province Provincesql)
                         {
                             currentProvince = Provincesql;
                             parameters.Provinces.Add(currentProvince);
@@ -105,11 +106,11 @@ namespace DataProcessor
 
                     if (rowsorderedenumerator.Current.VotingDistrictId is null)
                         currentVotingDistrict = null;
-                    else if (currentVotingDistrict is null || currentVotingDistrict.id != rowsorderedenumerator.Current.VotingDistrictId)
+                    else if (currentVotingDistrict is null || currentVotingDistrict.Id != rowsorderedenumerator.Current.VotingDistrictId)
                     {
-                        if (parameters.VotingDistricts.Find(votingdistrict => votingdistrict.id == rowsorderedenumerator.Current.VotingDistrictId) is VotingDistrict votingdistrict)
+                        if (parameters.VotingDistricts.Find(votingdistrict => votingdistrict.Id == rowsorderedenumerator.Current.VotingDistrictId) is VotingDistrict votingdistrict)
                             currentVotingDistrict = votingdistrict;
-                        else if (sqliteConnection.Table<VotingDistrict>().FirstOrDefault(_ => _.id == rowsorderedenumerator.Current.VotingDistrictId) is VotingDistrict votingdistrictsql)
+                        else if (sqliteConnection.Table<VotingDistrict>().FirstOrDefault(_ => _.Id == rowsorderedenumerator.Current.VotingDistrictId) is VotingDistrict votingdistrictsql)
                         {
                             currentVotingDistrict = votingdistrictsql;
                             parameters.VotingDistricts.Add(currentVotingDistrict);
@@ -120,11 +121,11 @@ namespace DataProcessor
                     {
                         if (rowsorderedenumerator.Current.MunicipalityName is null)
                             currentMunicipality = null;
-						else if (currentMunicipality is null || string.Equals(currentMunicipality.name, rowsorderedenumerator.Current.MunicipalityName, StringComparison.OrdinalIgnoreCase) is false)
+						else if (currentMunicipality is null || string.Equals(currentMunicipality.Name, rowsorderedenumerator.Current.MunicipalityName, StringComparison.OrdinalIgnoreCase) is false)
 						{
-							if (parameters.Municipalities.Find(_ => string.Equals(_.name, rowsorderedenumerator.Current.MunicipalityName, StringComparison.OrdinalIgnoreCase)) is Municipality municipality)
+							if (parameters.Municipalities.Find(_ => string.Equals(_.Name, rowsorderedenumerator.Current.MunicipalityName, StringComparison.OrdinalIgnoreCase)) is Municipality municipality)
 								currentMunicipality = municipality;
-							else if (sqliteConnection.Table<Municipality>().AsEnumerable().FirstOrDefault(_ => _.name == rowsorderedenumerator.Current.MunicipalityName) is Municipality municipalitysql)
+							else if (sqliteConnection.Table<Municipality>().AsEnumerable().FirstOrDefault(_ => _.Name == rowsorderedenumerator.Current.MunicipalityName) is Municipality municipalitysql)
                             {
                                 currentMunicipality = municipalitysql;
                                 parameters.Municipalities.Add(municipalitysql);
@@ -135,11 +136,11 @@ namespace DataProcessor
                     {
                         if (rowsorderedenumerator.Current.MunicipalityGeo is null)
                             currentMunicipality = null;
-                        else if (currentMunicipality is null || string.Equals(currentMunicipality.geoCode, rowsorderedenumerator.Current.MunicipalityGeo, StringComparison.OrdinalIgnoreCase) is false)
+                        else if (currentMunicipality is null || string.Equals(currentMunicipality.GeoCode, rowsorderedenumerator.Current.MunicipalityGeo, StringComparison.OrdinalIgnoreCase) is false)
                         {
-                            if (parameters.Municipalities.Find(_ => string.Equals(_.geoCode, rowsorderedenumerator.Current.MunicipalityGeo, StringComparison.OrdinalIgnoreCase)) is Municipality municipality)
+                            if (parameters.Municipalities.Find(_ => string.Equals(_.GeoCode, rowsorderedenumerator.Current.MunicipalityGeo, StringComparison.OrdinalIgnoreCase)) is Municipality municipality)
                                 currentMunicipality = municipality;
-                            else if (sqliteConnection.Table<Municipality>().AsEnumerable().FirstOrDefault(_ => string.Equals(_.geoCode, rowsorderedenumerator.Current.MunicipalityGeo, StringComparison.OrdinalIgnoreCase)) is Municipality municipalitysql)
+                            else if (sqliteConnection.Table<Municipality>().AsEnumerable().FirstOrDefault(_ => string.Equals(_.GeoCode, rowsorderedenumerator.Current.MunicipalityGeo, StringComparison.OrdinalIgnoreCase)) is Municipality municipalitysql)
                             {
                                 currentMunicipality = municipalitysql;
                                 parameters.Municipalities.Add(municipalitysql);
@@ -148,49 +149,49 @@ namespace DataProcessor
                     }
                     if (currentVotingDistrict is not null)
                     {
-                        currentVotingDistrict.pkWard ??= currentWard?.pk;
-                        currentVotingDistrict.pkMunicipality ??= currentMunicipality?.pk;
-                        currentVotingDistrict.pkProvince ??= rowsorderedenumerator.Current.ProvincePk;
+                        currentVotingDistrict.PkWard ??= currentWard?.Pk;
+                        currentVotingDistrict.PkMunicipality ??= currentMunicipality?.Pk;
+                        currentVotingDistrict.PkProvince ??= rowsorderedenumerator.Current.ProvincePk;
                     }
                     if (currentWard is not null)
                     {
-                        currentWard.pkMunicipality ??= currentMunicipality?.pk;
-                        currentWard.pkProvince ??= rowsorderedenumerator.Current.ProvincePk;
-                        currentWard.list_pkVotingDistrict = ElectionsItem.AddPKIfUnique(currentWard.list_pkVotingDistrict, currentVotingDistrict?.pk);
+                        currentWard.PkMunicipality ??= currentMunicipality?.Pk;
+                        currentWard.PkProvince ??= rowsorderedenumerator.Current.ProvincePk;
+                        currentWard.List_PkVotingDistrict = ElectionsItem.AddPKIfUnique(currentWard.List_PkVotingDistrict, currentVotingDistrict?.Pk);
                     }
                     if (currentMunicipality is not null)
                     {
-                        currentMunicipality.pkProvince ??= rowsorderedenumerator.Current.ProvincePk;
-                        currentMunicipality.list_pkWard = ElectionsItem.AddPKIfUnique(currentMunicipality.list_pkWard, currentWard?.pk);
+                        currentMunicipality.PkProvince ??= rowsorderedenumerator.Current.ProvincePk;
+                        currentMunicipality.List_PkWard = ElectionsItem.AddPKIfUnique(currentMunicipality.List_PkWard, currentWard?.Pk);
                     }
 
                     currentBallot = rowsorderedenumerator.Current.AsBallot(ballot =>
                     {
-                        ballot.pkElectoralEvent ??= electoralEvent.pk;
-                        ballot.pkProvince ??= currentProvince?.pk ?? rowsorderedenumerator.Current.ProvincePk;
-                        ballot.pkMunicipality ??= currentMunicipality?.pk;
-                        ballot.pkWard ??= currentWard?.pk;
-                        ballot.pkVotingDistrict ??= currentVotingDistrict?.pk;
+                        ballot.PkElectoralEvent ??= electoralEvent.Pk;
+                        ballot.PkProvince ??= currentProvince?.Pk ?? rowsorderedenumerator.Current.ProvincePk;
+                        ballot.PkMunicipality ??= currentMunicipality?.Pk;
+                        ballot.PkWard ??= currentWard?.Pk;
+                        ballot.PkVotingDistrict ??= currentVotingDistrict?.Pk;
                     });
                     electoralEventBallot ??= rowsorderedenumerator.Current.AsBallot(ballot =>
                     {
-                        ballot.pkElectoralEvent = electoralEvent.pk;
-                        ballot.pkProvince = null;
-                        ballot.pkMunicipality = null;
-                        ballot.pkWard = null;
-                        ballot.pkVotingDistrict = null;
-                        if (electoralEvent.type?.Contains(ElectoralEvent.Types.Municipal) ?? false)
-                            ballot.type = ElectoralEvent.Types.Municipal;
+                        ballot.PkElectoralEvent = electoralEvent.Pk;
+                        ballot.PkProvince = null;
+                        ballot.PkMunicipality = null;
+                        ballot.PkWard = null;
+                        ballot.PkVotingDistrict = null;
+                        if (electoralEvent.Type?.Contains(ElectoralEvent.Types.Municipal) ?? false)
+                            ballot.Type = ElectoralEvent.Types.Municipal;
                     });
                 }
 
                 if (rowsorderedenumerator.Current.PartyName is null)
                     currentParty = null;
-                else if (currentParty is null || string.Equals(currentParty.name, rowsorderedenumerator.Current.PartyName, StringComparison.OrdinalIgnoreCase) is false)
+                else if (currentParty is null || string.Equals(currentParty.Name, rowsorderedenumerator.Current.PartyName, StringComparison.OrdinalIgnoreCase) is false)
                 {
-                    if (parameters.Parties.Find(party => string.Equals(party.name, rowsorderedenumerator.Current.PartyName, StringComparison.OrdinalIgnoreCase)) is Party party)
+                    if (parameters.Parties.Find(party => string.Equals(party.Name, rowsorderedenumerator.Current.PartyName, StringComparison.OrdinalIgnoreCase)) is Party party)
                         currentParty = party;
-                    else if (sqliteConnection.Table<Party>().AsEnumerable().FirstOrDefault(_ => string.Equals(_.name, rowsorderedenumerator.Current.PartyName, StringComparison.OrdinalIgnoreCase)) is Party partysql)
+                    else if (sqliteConnection.Table<Party>().AsEnumerable().FirstOrDefault(_ => string.Equals(_.Name, rowsorderedenumerator.Current.PartyName, StringComparison.OrdinalIgnoreCase)) is Party partysql)
                     {
                         currentParty = partysql;
                         parameters.Parties.Add(partysql);
@@ -198,103 +199,103 @@ namespace DataProcessor
                 }
 
                 if (currentParty is not null && rowsorderedenumerator.Current.PartyVotes.HasValue)
-                    currentBallot.list_pkParty_votes = ElectionsItem.AddPKPairIfUnique(
-                        currentBallot.list_pkParty_votes, 
-                        currentParty.pk, 
+                    currentBallot.List_PkParty_Votes = ElectionsItem.AddPKPairIfUnique(
+                        currentBallot.List_PkParty_Votes, 
+                        currentParty.Pk, 
                         rowsorderedenumerator.Current.PartyVotes.Value);
             }
 
-            if (currentBallot?.pkElectoralEvent is not null)
+            if (currentBallot?.PkElectoralEvent is not null)
                 parameters.Ballots.Add(currentBallot);
 
             Console.WriteLine("Inserting Event Ballots");
 
             if (electoralEventBallot is not null)
             {
-				if (ElectoralEvent.IsMunicipal(electoralEvent.type))
-					electoralEventBallot.votersRegistered = null;
+				if (ElectoralEvent.IsMunicipal(electoralEvent.Type))
+					electoralEventBallot.VotersRegistered = null;
 
 				electoralEventBallot = sqliteConnection.CreateAndAdd(electoralEventBallot);
                 parameters.BallotsElectoralEvent.Add(electoralEventBallot);
-                electoralEvent.list_pkBallot = ElectionsItem.AddPKIfUnique(electoralEvent.list_pkBallot, electoralEventBallot.pk);
+                electoralEvent.List_PkBallot = ElectionsItem.AddPKIfUnique(electoralEvent.List_PkBallot, electoralEventBallot.Pk);
             }
 
             foreach (Ballot eventballot in parameters.Ballots
-                .Where(_ballot => string.IsNullOrWhiteSpace(_ballot.type) is false && _ballot.pkProvince.HasValue)
+                .Where(_ballot => string.IsNullOrWhiteSpace(_ballot.Type) is false && _ballot.PkProvince.HasValue)
                 .GroupBy(_ballot =>
                 {
                     return
-                        _ballot.type!.Split('.') is string[] typesplit &&
+                        _ballot.Type!.Split('.') is string[] typesplit &&
                         typesplit.Length == 2 &&
                         typesplit[0] == ElectoralEvent.Types.Municipal
-                            ? _ballot.type
-                            : string.Format("{0}.{1}", _ballot.type, CSVRow.Utils.ProvincePkToId(_ballot.pkProvince!.Value));
+                            ? _ballot.Type
+                            : string.Format("{0}.{1}", _ballot.Type, CSVRow.Utils.ProvincePkToId(_ballot.PkProvince!.Value));
                 })
                 .Where(groupedballot => groupedballot.Any())
                 .SelectMany(groupedballot =>
                 {
                     IEnumerable<Ballot> ballots = Enumerable.Empty<Ballot>();
                     bool ismunicipal = groupedballot.Key.Contains(ElectoralEvent.Types.Municipal, StringComparison.OrdinalIgnoreCase);
-                    Ballot _eventballot = new() { type = groupedballot.Key, };
+                    Ballot _eventballot = new() { Type = groupedballot.Key, };
                     Ballot? _municipalityballot = null;
 
-                    foreach (Ballot ballot in groupedballot.OrderBy(_ => _.pkProvince).ThenBy(_ => _.pkMunicipality))
+                    foreach (Ballot ballot in groupedballot.OrderBy(_ => _.PkProvince).ThenBy(_ => _.PkMunicipality))
                     {
                         if (ismunicipal)
                         {
                             if (_municipalityballot is null ||
-                                (ballot.pkMunicipality is not null && _municipalityballot.pkMunicipality is null) ||
-                                (ballot.pkMunicipality is null && _municipalityballot.pkMunicipality is not null) ||
+                                (ballot.PkMunicipality is not null && _municipalityballot.PkMunicipality is null) ||
+                                (ballot.PkMunicipality is null && _municipalityballot.PkMunicipality is not null) ||
                                 (
-                                    ballot.pkMunicipality is not null &&
-                                    _municipalityballot.pkMunicipality is not null &&
-                                    _municipalityballot.pkMunicipality.Value != ballot.pkMunicipality.Value
+                                    ballot.PkMunicipality is not null &&
+                                    _municipalityballot.PkMunicipality is not null &&
+                                    _municipalityballot.PkMunicipality.Value != ballot.PkMunicipality.Value
 
                                 ))
                             {
                                 if (_municipalityballot is not null)
                                     ballots = ballots.Append(_municipalityballot);
 
-                                _municipalityballot = new() { type = groupedballot.Key, };
+                                _municipalityballot = new() { Type = groupedballot.Key, };
                             }
 
-                            _municipalityballot.pkProvince ??= ballot.pkProvince;
-                            _municipalityballot.pkMunicipality ??= ballot.pkMunicipality;
-                            _municipalityballot.pkElectoralEvent ??= ballot.pkElectoralEvent;
+                            _municipalityballot.PkProvince ??= ballot.PkProvince;
+                            _municipalityballot.PkMunicipality ??= ballot.PkMunicipality;
+                            _municipalityballot.PkElectoralEvent ??= ballot.PkElectoralEvent;
                             _municipalityballot.UpdateBallot(ballot);
                         }
 
                         _eventballot.UpdateBallot(ballot);
-                        _eventballot.pkProvince ??= ismunicipal ? null : ballot.pkProvince;
-                        _eventballot.pkElectoralEvent ??= ballot.pkElectoralEvent;
+                        _eventballot.PkProvince ??= ismunicipal ? null : ballot.PkProvince;
+                        _eventballot.PkElectoralEvent ??= ballot.PkElectoralEvent;
                     }
 
-                    electoralEventBallot?.UpdatePartyVotes(_eventballot.list_pkParty_votes);
+                    electoralEventBallot?.UpdatePartyVotes(_eventballot.List_PkParty_Votes);
 
                     return ballots.Prepend(_eventballot);
 
-                }).OrderBy(_ => _.pkMunicipality.HasValue))
+                }).OrderBy(_ => _.PkMunicipality.HasValue))
             {
                 Ballot added = sqliteConnection.CreateAndAdd(eventballot);
                 parameters.BallotsElectoralEvent.Add(added);
 
-                if (ElectoralEvent.IsMunicipal(electoralEvent.type))
+                if (ElectoralEvent.IsMunicipal(electoralEvent.Type))
                 {
                     if (electoralEventBallot is not null)
-                        electoralEventBallot.votersRegistered = Math.Max(
-                            eventballot.votersRegistered ?? 0,
-                            electoralEventBallot.votersRegistered ?? 0);
+                        electoralEventBallot.VotersRegistered = Math.Max(
+                            eventballot.VotersRegistered ?? 0,
+                            electoralEventBallot.VotersRegistered ?? 0);
 
-					if (added.pkMunicipality is null)
-                        electoralEvent.list_pkBallot = ElectionsItem.AddPKIfUnique(electoralEvent.list_pkBallot, added.pk);
+					if (added.PkMunicipality is null)
+                        electoralEvent.List_PkBallot = ElectionsItem.AddPKIfUnique(electoralEvent.List_PkBallot, added.Pk);
                 }
-                else electoralEvent.list_pkBallot = ElectionsItem.AddPKIfUnique(electoralEvent.list_pkBallot, added.pk);
+                else electoralEvent.List_PkBallot = ElectionsItem.AddPKIfUnique(electoralEvent.List_PkBallot, added.Pk);
             }
 
             sqliteConnection.Update(electoralEventBallot);
 
             Console.WriteLine("Inserting Ballots");
-            if (electoralEvent.pk != 1 && electoralEvent.pk != 2)
+            if (electoralEvent.Pk != 1 && electoralEvent.Pk != 2)
                 sqliteConnection.InsertAll(parameters.Ballots);
             Console.WriteLine("Updating Provinces");
             sqliteConnection.UpdateAll(parameters.Provinces);
@@ -306,7 +307,7 @@ namespace DataProcessor
             sqliteConnection.UpdateAll(parameters.Wards);
             Console.WriteLine("Updating Parties");
             foreach (Party party in parameters.Parties)
-                party.list_pkElectoralEvent = ElectionsItem.AddPKIfUnique(party.list_pkElectoralEvent, electoralEvent.pk);
+                party.List_PkElectoralEvent = ElectionsItem.AddPKIfUnique(party.List_PkElectoralEvent, electoralEvent.Pk);
             sqliteConnection.UpdateAll(parameters.Parties);
             Console.WriteLine("Updating ElectoralEvent");
             sqliteConnection.Update(electoralEvent);

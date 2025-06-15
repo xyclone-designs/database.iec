@@ -1,11 +1,12 @@
-﻿using DataProcessor.CSVs;
-using DataProcessor.Tables;
+﻿using Database.IEC.Inputs.CSVs;
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
+
+using XycloneDesigns.Database.IEC.Tables;
 
 namespace SQLite
 {
@@ -45,7 +46,7 @@ namespace SQLite
 
             if (t is null)
             {
-                onCreate.Invoke(t = new T() { pk = pk.Value });
+                onCreate.Invoke(t = new T() { Pk = pk.Value });
                 sqliteConnection.Insert(t);
             }
 
@@ -67,22 +68,22 @@ namespace SQLite
 				.Select(row => row.PartyName)
 				.OfType<string>()
 				.Distinct()
-				.Where(name =>
+				.Where(Name =>
 				{
-					return string.IsNullOrWhiteSpace(name) is false && name != "0" && sqliteConnection
+					return string.IsNullOrWhiteSpace(Name) is false && Name != "0" && sqliteConnection
 						.Table<Party>()
-						.Any(party => string.Equals(name, party.name, StringComparison.OrdinalIgnoreCase)) is false;
+						.Any(party => string.Equals(Name, party.Name, StringComparison.OrdinalIgnoreCase)) is false;
 
-				}).Select(name => new Party
+				}).Select(Name => new Party
 				{
-					name = name,
+					Name = Name,
 
 				}).ToList();
 
 			log.WriteLine("Parties - Inserting Names");
 			Console.WriteLine("Parties - Inserting...");
 			sqliteConnection.InsertAll(parties);
-			foreach (Party party in parties) log.WriteLine(party.name ?? "null");
+			foreach (Party party in parties) log.WriteLine(party.Name ?? "null");
 
 			return parties;
 		}
@@ -98,13 +99,13 @@ namespace SQLite
 					{
 						return row.MunicipalityName is not null && sqliteConnection
 							.Table<Municipality>()
-							.Any(municipality => string.Equals(row.MunicipalityName, municipality.name, StringComparison.OrdinalIgnoreCase)) is false;
+							.Any(municipality => string.Equals(row.MunicipalityName, municipality.Name, StringComparison.OrdinalIgnoreCase)) is false;
 
 					}).Select(row => new Municipality
 					{
-						pkProvince = row.ProvincePk,
-						geoCode = row.MunicipalityGeo,
-						name = row.MunicipalityName,
+						PkProvince = row.ProvincePk,
+						GeoCode = row.MunicipalityGeo,
+						Name = row.MunicipalityName,
 
 					}).ToList()
 				: rows
@@ -116,23 +117,23 @@ namespace SQLite
 							.Any(municipality =>
 							{
 								return
-									string.Equals(row.MunicipalityGeo, municipality.geoCode, StringComparison.OrdinalIgnoreCase) ||
-									string.Equals(row.MunicipalityName, municipality.name, StringComparison.OrdinalIgnoreCase);
+									string.Equals(row.MunicipalityGeo, municipality.GeoCode, StringComparison.OrdinalIgnoreCase) ||
+									string.Equals(row.MunicipalityName, municipality.Name, StringComparison.OrdinalIgnoreCase);
 
 							}) is false;
 
 					}).Select(row => new Municipality
 					{
-						pkProvince = row.ProvincePk,
-						geoCode = row.MunicipalityGeo,
-						name = row.MunicipalityName,
+						PkProvince = row.ProvincePk,
+						GeoCode = row.MunicipalityGeo,
+						Name = row.MunicipalityName,
 
 					}).ToList();
 
 			log.WriteLine("Municipalities - Inserting Geos & Names");
 			Console.WriteLine("Municipalities - Inserting...");
 			sqliteConnection.InsertAll(municipalities);
-			foreach (Municipality municipality in municipalities) log.WriteLine("[{0}] - {1}", municipality.geoCode ?? "_", municipality.name ?? "null");
+			foreach (Municipality municipality in municipalities) log.WriteLine("[{0}] - {1}", municipality.GeoCode ?? "_", municipality.Name ?? "null");
 
 			return municipalities;
 		}
@@ -144,17 +145,17 @@ namespace SQLite
 				.Select(row => row.VotingDistrictId)
 				.OfType<string>()
 				.Distinct()
-				.Where(id => sqliteConnection.Table<VotingDistrict>().Any(_ => _.id == id) is false)
-				.Select(id => new VotingDistrict
+				.Where(Id => sqliteConnection.Table<VotingDistrict>().Any(_ => _.Id == Id) is false)
+				.Select(Id => new VotingDistrict
 				{
-					id = id,
+					Id = Id,
 
 				}).ToList();
 
 			log.WriteLine("VotingDistricts - Inserting Ids");
 			Console.WriteLine("VotingDistricts - Inserting...");
 			sqliteConnection.InsertAll(votingdistricts);
-			foreach (VotingDistrict votingdistrict in votingdistricts) log.WriteLine(votingdistrict.id ?? "null");
+			foreach (VotingDistrict votingdistrict in votingdistricts) log.WriteLine(votingdistrict.Id ?? "null");
 
 			return votingdistricts;
 		}
@@ -170,22 +171,22 @@ namespace SQLite
 
 					_ => null
 
-				}).OfType<string>().Distinct().Where(id =>
+				}).OfType<string>().Distinct().Where(Id =>
 				{
 					return sqliteConnection
 						.Table<Ward>()
-						.Any(ward => id == ward.id) is false;
+						.Any(ward => Id == ward.Id) is false;
 
-				}).Select(id => new Ward
+				}).Select(Id => new Ward
 				{
-					id = id,
+					Id = Id,
 
 				}).ToList();
 
 			log.WriteLine("Wards - Inserting Ids");
 			Console.WriteLine("Wards - Inserting...");
 			sqliteConnection.InsertAll(wards);
-			foreach (Ward ward in wards) log.WriteLine(ward.id ?? "null");
+			foreach (Ward ward in wards) log.WriteLine(ward.Id ?? "null");
 
 			return wards;
 		}
@@ -208,8 +209,8 @@ namespace SQLite
 			municipalityGeoCodeOrName = municipalityGeoCodeOrName?.Trim().Trim('"');
 			Municipality? municipality = municipalityGeoCodeOrName is null ? null : sqliteConnection.Find<Municipality>(
 				municipality =>
-					(municipality.name != null && municipality.name.ToLower() == municipalityGeoCodeOrName.ToLower()) ||
-					(municipality.geoCode != null && municipality.geoCode.ToLower() == municipalityGeoCodeOrName.ToLower())
+					(municipality.Name != null && municipality.Name.ToLower() == municipalityGeoCodeOrName.ToLower()) ||
+					(municipality.GeoCode != null && municipality.GeoCode.ToLower() == municipalityGeoCodeOrName.ToLower())
 			);
 
 			if (municipality is null)
@@ -225,7 +226,7 @@ namespace SQLite
 		{
 			partyName = partyName?.Trim().Trim('"');
 			Party? party = partyName is null ? null : sqliteConnection.Find<Party>(
-				party => party.name != null && party.name.ToLower() == partyName.ToLower()
+				party => party.Name != null && party.Name.ToLower() == partyName.ToLower()
 			);
 
 			if (party is null)
@@ -239,7 +240,7 @@ namespace SQLite
 		}
 		public static bool ReportVotingDistrict(this SQLiteConnection sqliteConnection, string? votingDistrictId, StreamWriter? streamWriterErrors)
 		{
-			VotingDistrict? votingDistrict = sqliteConnection.Find<VotingDistrict>(votingDistrict => votingDistrict.id == votingDistrictId);
+			VotingDistrict? votingDistrict = sqliteConnection.Find<VotingDistrict>(votingDistrict => votingDistrict.Id == votingDistrictId);
 
 			if (votingDistrict is null)
 			{
@@ -252,7 +253,7 @@ namespace SQLite
 		}
 		public static bool ReportWard(this SQLiteConnection sqliteConnection, string? wardId, StreamWriter? streamWriterErrors)
 		{
-			Ward? ward = sqliteConnection.Find<Ward>(ward => ward.id == wardId);
+			Ward? ward = sqliteConnection.Find<Ward>(ward => ward.Id == wardId);
 
 			if (ward is null)
 			{

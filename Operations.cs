@@ -1,12 +1,13 @@
-﻿using DataProcessor.CSVs;
-using DataProcessor.Tables;
+﻿using Database.IEC.Inputs.CSVs;
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace DataProcessor
+using XycloneDesigns.Database.IEC.Tables;
+
+namespace Database.IEC
 {
     public static class Operations
     {
@@ -24,12 +25,12 @@ namespace DataProcessor
                 if (row.MunicipalityName is null && row.MunicipalityGeo is null)
                     return;
 
-                if (Municipalities.FirstOrDefault(_ => _.geoCode == row.MunicipalityGeo) is Municipality municipalityGeo)
+                if (Municipalities.FirstOrDefault(_ => _.GeoCode == row.MunicipalityGeo) is Municipality municipalityGeo)
                 {
-                    if (row.MunicipalityName is null || municipalityGeo.name is null || row.MunicipalityName == municipalityGeo.name)
+                    if (row.MunicipalityName is null || municipalityGeo.Name is null || row.MunicipalityName == municipalityGeo.Name)
                         return;
 
-                    if (row.MunicipalityName.Contains(municipalityGeo.name))
+                    if (row.MunicipalityName.Contains(municipalityGeo.Name))
                     {
                         writer.WriteLine("[{0}]: Municipality = {1} - {2} (Replaced)", row.LineNumber, row.MunicipalityGeo, row.MunicipalityName);
                         Console.WriteLine("[{0}]: Municipality = {1} - {2} (Replaced)", row.LineNumber, row.MunicipalityGeo, row.MunicipalityName);
@@ -37,8 +38,8 @@ namespace DataProcessor
                         Municipalities.Remove(municipalityGeo);
                         Municipalities.Add(new Municipality
                         {
-                            geoCode = row.MunicipalityGeo,
-                            name = row.MunicipalityName,
+                            GeoCode = row.MunicipalityGeo,
+                            Name = row.MunicipalityName,
                         });
                     }
                 }
@@ -48,8 +49,8 @@ namespace DataProcessor
                     Console.WriteLine("[{0}]: Municipality = {1} - {2}", row.LineNumber, row.MunicipalityGeo, row.MunicipalityName);
                     Municipalities.Add(new Municipality
                     {
-                        geoCode = row.MunicipalityGeo,
-                        name = row.MunicipalityName,
+                        GeoCode = row.MunicipalityGeo,
+                        Name = row.MunicipalityName,
                     });
                 }
             }
@@ -60,7 +61,7 @@ namespace DataProcessor
 
                 if (Parties.Any(_party => 
                 {
-                    return _party.name == row.PartyName;
+                    return _party.Name == row.PartyName;
 
                 }) is false)
                 {
@@ -69,7 +70,7 @@ namespace DataProcessor
 
                     Parties.Add(new Party
                     {
-                        name = row.PartyName,
+                        Name = row.PartyName,
                     });
                 }
             }
@@ -80,7 +81,7 @@ namespace DataProcessor
 
                 if (VotingDistricts.Any(_votingdistrict =>
                 {
-                    return _votingdistrict.id == row.VotingDistrictId;
+                    return _votingdistrict.Id == row.VotingDistrictId;
 
                 }) is false)
                 {
@@ -89,7 +90,7 @@ namespace DataProcessor
 
                     VotingDistricts.Add(new VotingDistrict
                     {
-                        id = row.VotingDistrictId,
+                        Id = row.VotingDistrictId,
                     });
                 }
             }
@@ -104,7 +105,7 @@ namespace DataProcessor
 
                 } is string ward && Wards.Any(_ward =>
                 {
-                    return _ward.id == ward;
+                    return _ward.Id == ward;
 
                 }) is false)
                 {
@@ -113,7 +114,7 @@ namespace DataProcessor
 
                     Wards.Add(new Ward
                     {
-                        id = ward,
+                        Id = ward,
                     });
                 }
             }
@@ -147,26 +148,26 @@ namespace DataProcessor
             writer.WriteLine();
             writer.WriteLine("Municipalities");
             writer.WriteLine();
-            foreach (string municipality in Municipalities.Select(_ => string.Format("{0} - {1}", _.geoCode, _.name)).Order())
+            foreach (string municipality in Municipalities.Select(_ => string.Format("{0} - {1}", _.GeoCode, _.Name)).Order())
                 writer.WriteLine(municipality);
 
             writer.WriteLine();
             writer.WriteLine("Parties");
             writer.WriteLine();
-            foreach (Party party in Parties.OrderBy(_ => _.name))
-                writer.WriteLine(party.name);
+            foreach (Party party in Parties.OrderBy(_ => _.Name))
+                writer.WriteLine(party.Name);
 
             writer.WriteLine();
             writer.WriteLine("VotingDistricts");
             writer.WriteLine();
-            foreach (VotingDistrict votingDistrict in VotingDistricts.OrderBy(_ => _.id))
-                writer.WriteLine(votingDistrict.id);
+            foreach (VotingDistrict votingDistrict in VotingDistricts.OrderBy(_ => _.Id))
+                writer.WriteLine(votingDistrict.Id);
 
             writer.WriteLine();
             writer.WriteLine("Wards");
             writer.WriteLine();
-            foreach (Ward ward in Wards.OrderBy(_ => _.id))
-                writer.WriteLine(ward.id);
+            foreach (Ward ward in Wards.OrderBy(_ => _.Id))
+                writer.WriteLine(ward.Id);
         }
     }
 }
