@@ -5,7 +5,10 @@ using System.Data;
 using System.Collections.Generic;
 using System.Linq;
 
-using XycloneDesigns.Database.IEC.Tables;
+using XycloneDesigns.Apis.IEC.Tables;
+using XycloneDesigns.Apis.General.Tables;
+
+using _TableGeneral = XycloneDesigns.Apis.General.Tables._Table;
 
 namespace Database.IEC
 {
@@ -75,11 +78,11 @@ namespace Database.IEC
 						{
                             Party party = sqliteConnection.Table<Party>().AsEnumerable().First(_party => string.Equals(_party.Name, PartyName, StringComparison.OrdinalIgnoreCase));
 
-							ballotmunicipality.List_PkParty_Seats = ElectionsItem.AddPKPairIfUnique(ballotmunicipality.List_PkParty_Seats, party.Pk, PartySeats.Value, true);
+							ballotmunicipality.List_PkParty_Seats = _TableGeneral.AddPKPairIfUnique(ballotmunicipality.List_PkParty_Seats, party.Pk, PartySeats.Value, true);
 							if (ballotmunicipalitypr is not null && ballotmunicipality.Type!.Contains("pr"))
-								ballotmunicipalitypr.List_PkParty_Seats = ElectionsItem.AddPKPairIfUnique(ballotmunicipalitypr.List_PkParty_Seats, party.Pk, PartySeats.Value, true);
+								ballotmunicipalitypr.List_PkParty_Seats = _TableGeneral.AddPKPairIfUnique(ballotmunicipalitypr.List_PkParty_Seats, party.Pk, PartySeats.Value, true);
 							if (ballotmunicipalityward is not null && ballotmunicipality.Type!.Contains("ward"))
-								ballotmunicipalityward.List_PkParty_Seats = ElectionsItem.AddPKPairIfUnique(ballotmunicipalityward.List_PkParty_Seats, party.Pk, PartySeats.Value, true);
+								ballotmunicipalityward.List_PkParty_Seats = _TableGeneral.AddPKPairIfUnique(ballotmunicipalityward.List_PkParty_Seats, party.Pk, PartySeats.Value, true);
 						}
 					}
 			}

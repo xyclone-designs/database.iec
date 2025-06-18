@@ -1,6 +1,6 @@
 ﻿using System;
 
-using XycloneDesigns.Database.IEC.Tables;
+using XycloneDesigns.Apis.IEC.Tables;
 
 namespace Database.IEC.Inputs.CSVs
 {

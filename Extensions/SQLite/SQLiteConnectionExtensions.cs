@@ -6,19 +6,22 @@ using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 
-using XycloneDesigns.Database.IEC.Tables;
+using XycloneDesigns.Apis.General.Tables;
+using XycloneDesigns.Apis.IEC.Tables;
+
+using _TableIEC = XycloneDesigns.Apis.IEC.Tables._Table;
 
 namespace SQLite
 {
     public static class SQLiteConnectionExtensions
     {
-        public static T CreateAndAdd<T>(this SQLiteConnection sqliteConnection, T t) where T : ElectionsItem, new()
+        public static T CreateAndAdd<T>(this SQLiteConnection sqliteConnection, T t) where T : _TableIEC, new()
         {
             sqliteConnection.Insert(t);
 
             return sqliteConnection.Table<T>().Last();
         }
-        public static T FindOrCreateAndAdd<T>(this SQLiteConnection sqliteConnection, Expression<Func<T, bool>> predicate, Action<T> onCreate) where T : ElectionsItem, new()
+        public static T FindOrCreateAndAdd<T>(this SQLiteConnection sqliteConnection, Expression<Func<T, bool>> predicate, Action<T> onCreate) where T : _TableIEC, new()
         {
             T? t = null;
             try { t = sqliteConnection.Find<T>(predicate); } catch (Exception) { }
@@ -30,7 +33,7 @@ namespace SQLite
 
             return sqliteConnection.Table<T>().Last();
         }
-        public static T FindOrCreateAndAdd<T>(this SQLiteConnection sqliteConnection, int? pk, Action<T> onCreate) where T : ElectionsItem, new()
+        public static T FindOrCreateAndAdd<T>(this SQLiteConnection sqliteConnection, int? pk, Action<T> onCreate) where T : _TableIEC, new()
         {
             T? t;
 
@@ -53,14 +56,14 @@ namespace SQLite
             return t;
         }
 
-		public static void CSVNew<TCSVRow>(this SQLiteConnection sqliteConnection, StreamWriter log, IEnumerable<TCSVRow> rows) where TCSVRow : CSVRow
+		public static void CSVNew<TCSVRow>(this SQLiteConnection sqliteConnection, StreamWriter? log, IEnumerable<TCSVRow> rows) where TCSVRow : CSVRow
 		{
 			CSVNewParties(sqliteConnection, log, rows);
 			CSVNewMunicipalities(sqliteConnection, log, rows);
 			CSVNewVotingDistricts(sqliteConnection, log, rows);
 			CSVNewWards(sqliteConnection, log, rows);
 		}
-		public static List<Party> CSVNewParties<TCSVRow>(this SQLiteConnection sqliteConnection, StreamWriter log, IEnumerable<TCSVRow> rows) where TCSVRow : CSVRow
+		public static List<Party> CSVNewParties<TCSVRow>(this SQLiteConnection sqliteConnection, StreamWriter? log, IEnumerable<TCSVRow> rows) where TCSVRow : CSVRow
 		{
 			Console.WriteLine("Parties");
 			Console.WriteLine("Parties - Retrieving...");
@@ -80,18 +83,17 @@ namespace SQLite
 
 				}).ToList();
 
-			log.WriteLine("Parties - Inserting Names");
+			log?.WriteLine("Parties - Inserting Names");
 			Console.WriteLine("Parties - Inserting...");
 			sqliteConnection.InsertAll(parties);
 			foreach (Party party in parties) log.WriteLine(party.Name ?? "null");
 
 			return parties;
 		}
-		public static List<Municipality> CSVNewMunicipalities<TCSVRow>(this SQLiteConnection sqliteConnection, StreamWriter log, IEnumerable<TCSVRow> rows) where TCSVRow : CSVRow
+		public static List<Municipality> CSVNewMunicipalities<TCSVRow>(this SQLiteConnection sqliteConnection, StreamWriter? log, IEnumerable<TCSVRow> rows) where TCSVRow : CSVRow
 		{
 			Console.WriteLine("Municipalities");
 			Console.WriteLine("Municipalities - Retrieving...");
-
 			List<Municipality> municipalities = typeof(TCSVRow) == typeof(NPE1999)
 				? rows
 					.DistinctBy(row => row.MunicipalityName)
@@ -130,14 +132,14 @@ namespace SQLite
 
 					}).ToList();
 
-			log.WriteLine("Municipalities - Inserting Geos & Names");
+			log?.WriteLine("Municipalities - Inserting Geos & Names");
 			Console.WriteLine("Municipalities - Inserting...");
 			sqliteConnection.InsertAll(municipalities);
 			foreach (Municipality municipality in municipalities) log.WriteLine("[{0}] - {1}", municipality.GeoCode ?? "_", municipality.Name ?? "null");
 
 			return municipalities;
 		}
-		public static List<VotingDistrict> CSVNewVotingDistricts<TCSVRow>(this SQLiteConnection sqliteConnection, StreamWriter log, IEnumerable<TCSVRow> rows) where TCSVRow : CSVRow
+		public static List<VotingDistrict> CSVNewVotingDistricts<TCSVRow>(this SQLiteConnection sqliteConnection, StreamWriter? log, IEnumerable<TCSVRow> rows) where TCSVRow : CSVRow
 		{
 			Console.WriteLine("VotingDistricts");
 			Console.WriteLine("VotingDistricts - Retrieving...");
@@ -152,14 +154,14 @@ namespace SQLite
 
 				}).ToList();
 
-			log.WriteLine("VotingDistricts - Inserting Ids");
+			log?.WriteLine("VotingDistricts - Inserting Ids");
 			Console.WriteLine("VotingDistricts - Inserting...");
 			sqliteConnection.InsertAll(votingdistricts);
 			foreach (VotingDistrict votingdistrict in votingdistricts) log.WriteLine(votingdistrict.Id ?? "null");
 
 			return votingdistricts;
 		}
-		public static List<Ward> CSVNewWards<TCSVRow>(this SQLiteConnection sqliteConnection, StreamWriter log, IEnumerable<TCSVRow> rows) where TCSVRow : CSVRow
+		public static List<Ward> CSVNewWards<TCSVRow>(this SQLiteConnection sqliteConnection, StreamWriter? log, IEnumerable<TCSVRow> rows) where TCSVRow : CSVRow
 		{
 			Console.WriteLine("Wards");
 			Console.WriteLine("Wards - Retrieving...");
@@ -183,7 +185,7 @@ namespace SQLite
 
 				}).ToList();
 
-			log.WriteLine("Wards - Inserting Ids");
+			log?.WriteLine("Wards - Inserting Ids");
 			Console.WriteLine("Wards - Inserting...");
 			sqliteConnection.InsertAll(wards);
 			foreach (Ward ward in wards) log.WriteLine(ward.Id ?? "null");

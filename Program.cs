@@ -13,24 +13,34 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 
-using XycloneDesigns.Database.IEC.Tables;
+using XycloneDesigns.Apis.IEC.Tables;
+
+using _TableGeneral = XycloneDesigns.Apis.General.Tables._Table;
+using static Database.IEC.Program;
 
 namespace Database.IEC
 {
     internal partial class Program
     {
-        static void Main(string[] args)
-		{
-			string directory = Path.Combine(Directory.GetCurrentDirectory(), ".output");
+		static readonly string DirectoryCurrent = Directory.GetCurrentDirectory();
+		//static readonly string DirectoryCurrent = Directory.GetParent(Directory.GetCurrentDirectory())?.Parent?.Parent?.FullName!;
 
-			if (Directory.Exists(directory) is false) Directory.CreateDirectory(directory);
+		static readonly string DirectoryOutput = Path.Combine(DirectoryCurrent, ".output");
+		static readonly string DirectoryInput = Path.Combine(DirectoryCurrent, ".input");
+		static readonly string DirectoryInputMunicipalities = Path.Combine(DirectoryInput, ".input");
+
+		static void Main(string[] args)
+		{
+			if (Directory.Exists(DirectoryOutput) is false) Directory.CreateDirectory(DirectoryOutput);
 
 			string dbname = "iec.db";
             string dbnameversioned = "iec.1.db";
+            string dbmunicipalityname = "municipalities.db";
             string logname = "log.txt";
-			string dbpath = Path.Combine(directory, dbname);
-            string dbpathversioned = Path.Combine(directory, dbnameversioned);
-            string logpath = Path.Combine(directory, logname);
+			string dbpath = Path.Combine(DirectoryOutput, dbname);
+			string dbmunicipalitypath = Path.Combine(DirectoryOutput, dbmunicipalityname);
+            string dbpathversioned = Path.Combine(DirectoryOutput, dbnameversioned);
+            string logpath = Path.Combine(DirectoryOutput, logname);
             string datapath = Path.Combine(Directory.GetCurrentDirectory(), ".inputs", "data.zip");
             int[] pksElectoralEvent =
             [
@@ -64,9 +74,10 @@ namespace Database.IEC
             using FileStream logfilestream = File.Open(logpath, FileMode.OpenOrCreate);
             using StreamWriter logstreamwriter = new(logfilestream);
             using ZipArchive datazip = new(datastream);
-            using SQLiteConnection sqliteConnection = SQLiteConnection(dbpath, false);
+			using SQLiteConnection sqliteConnection = SQLiteConnection(dbpath);
+			using SQLiteConnection sqliteconnectionmunicipality = new(dbmunicipalitypath);
 
-            SQLiteConnection(dbpathversioned, false).Close();
+			SQLiteConnection(dbpathversioned).Close();
 
 			datazip.ReadDataProvinces(sqliteConnection, logstreamwriter);
             datazip.ReadDataParties(sqliteConnection, logstreamwriter);
@@ -75,7 +86,7 @@ namespace Database.IEC
 
             JArray apifiles = [];
             List<ElectoralEvent> electoralevents = [.. sqliteConnection.Table<ElectoralEvent>()];
-			CSVParameters parameters = new()
+			Parameters parameters = new()
             {
                 ElectoralEvents = [],
                 Parties = [],
@@ -104,11 +115,11 @@ namespace Database.IEC
                 IEnumerable<Ballot> ballotsindividual = sqliteConnection.Table<Ballot>()
                     .Where(ballot => ballot.PkElectoralEvent == NE1994ElectoralEvent.Pk);
 
-				string NE1994dbpath = ElectoralEventPath(directory, NE1994ElectoralEvent, "db");
-                string NE1994txtpath = ElectoralEventPath(directory, NE1994ElectoralEvent, "txt");
+				string NE1994dbpath = ElectoralEventPath(DirectoryOutput, NE1994ElectoralEvent, "db");
+                string NE1994txtpath = ElectoralEventPath(DirectoryOutput, NE1994ElectoralEvent, "txt");
 
                 PksToText(NE1994txtpath, parameters);
-                using SQLiteConnection connectionNE1994 = SQLiteConnection(NE1994dbpath, true);
+                using SQLiteConnection connectionNE1994 = SQLiteConnection(NE1994dbpath);
                 connectionNE1994.InsertAll(ballotsindividual);
                 connectionNE1994.Close();   
 			}
@@ -132,11 +143,11 @@ namespace Database.IEC
                 IEnumerable<Ballot> ballotsindividual = sqliteConnection.Table<Ballot>()
                     .Where(ballot => ballot.PkElectoralEvent == PE1994ElectoralEvent.Pk);
 
-                string PE1994dbpath = ElectoralEventPath(directory, PE1994ElectoralEvent, "db");
-                string PE1994txtpath = ElectoralEventPath(directory, PE1994ElectoralEvent, "txt");
+                string PE1994dbpath = ElectoralEventPath(DirectoryOutput, PE1994ElectoralEvent, "db");
+                string PE1994txtpath = ElectoralEventPath(DirectoryOutput, PE1994ElectoralEvent, "txt");
 
                 PksToText(PE1994txtpath, parameters);
-                using SQLiteConnection connectionPE1994 = SQLiteConnection(PE1994dbpath, true);
+                using SQLiteConnection connectionPE1994 = SQLiteConnection(PE1994dbpath);
                 connectionPE1994.InsertAll(ballotsindividual);
                 connectionPE1994.Close();
             }
@@ -172,10 +183,10 @@ namespace Database.IEC
                     IEnumerable<Ballot> ballotsindividual = sqliteConnection.Table<Ballot>()
                         .Where(ballot => ballot.PkElectoralEvent == NE1999ElectoralEvent.Pk);
 
-                    string NE1999dbpath = ElectoralEventPath(directory, NE1999ElectoralEvent, "db");
-                    string NE1999txtpath = ElectoralEventPath(directory, NE1999ElectoralEvent, "txt");
+                    string NE1999dbpath = ElectoralEventPath(DirectoryOutput, NE1999ElectoralEvent, "db");
+                    string NE1999txtpath = ElectoralEventPath(DirectoryOutput, NE1999ElectoralEvent, "txt");
                     PksToText(NE1999txtpath, parameters);
-                    using SQLiteConnection connectionNE1999 = SQLiteConnection(NE1999dbpath, true);
+                    using SQLiteConnection connectionNE1999 = SQLiteConnection(NE1999dbpath);
                     connectionNE1999.InsertAll(ballotsindividual);
                     connectionNE1999.Close();
                 }
@@ -184,10 +195,10 @@ namespace Database.IEC
                     IEnumerable<Ballot> ballotsindividual = sqliteConnection.Table<Ballot>()
                         .Where(ballot => ballot.PkElectoralEvent == PE1999ElectoralEvent.Pk);
 
-                    string PE1999dbpath = ElectoralEventPath(directory, PE1999ElectoralEvent, "db");
-                    string PE1999txtpath = ElectoralEventPath(directory, PE1999ElectoralEvent, "txt");
+                    string PE1999dbpath = ElectoralEventPath(DirectoryOutput, PE1999ElectoralEvent, "db");
+                    string PE1999txtpath = ElectoralEventPath(DirectoryOutput, PE1999ElectoralEvent, "txt");
                     PksToText(PE1999txtpath, parameters);
-                    using SQLiteConnection connectionPE1999 = SQLiteConnection(PE1999dbpath, true);
+                    using SQLiteConnection connectionPE1999 = SQLiteConnection(PE1999dbpath);
                     connectionPE1999.InsertAll(ballotsindividual);
                     connectionPE1999.Close();
                 }
@@ -215,11 +226,11 @@ namespace Database.IEC
 				IEnumerable<Ballot> ballotsindividual = sqliteConnection.Table<Ballot>()
                     .Where(ballot => ballot.PkElectoralEvent == LGE2000ElectoralEvent.Pk);
 
-                string LGE2000dbpath = ElectoralEventPath(directory, LGE2000ElectoralEvent, "db");
-                string LGE2000txtpath = ElectoralEventPath(directory, LGE2000ElectoralEvent, "txt");
+                string LGE2000dbpath = ElectoralEventPath(DirectoryOutput, LGE2000ElectoralEvent, "db");
+                string LGE2000txtpath = ElectoralEventPath(DirectoryOutput, LGE2000ElectoralEvent, "txt");
 
                 PksToText(LGE2000txtpath, parameters);
-                using SQLiteConnection connectionLGE2000 = SQLiteConnection(LGE2000dbpath, true);
+                using SQLiteConnection connectionLGE2000 = SQLiteConnection(LGE2000dbpath);
                 connectionLGE2000.InsertAll(ballotsindividual);
                 connectionLGE2000.Close();
             }
@@ -255,10 +266,10 @@ namespace Database.IEC
                     IEnumerable<Ballot> ballotsindividual = sqliteConnection.Table<Ballot>()
                         .Where(ballot => ballot.PkElectoralEvent == NE2004ElectoralEvent.Pk);
 
-                    string NE2004dbpath = ElectoralEventPath(directory, NE2004ElectoralEvent, "db");
-                    string NE2004txtpath = ElectoralEventPath(directory, NE2004ElectoralEvent, "txt");
+                    string NE2004dbpath = ElectoralEventPath(DirectoryOutput, NE2004ElectoralEvent, "db");
+                    string NE2004txtpath = ElectoralEventPath(DirectoryOutput, NE2004ElectoralEvent, "txt");
                     PksToText(NE2004txtpath, parameters);
-                    using SQLiteConnection connectionNE2004 = SQLiteConnection(NE2004dbpath, true);
+                    using SQLiteConnection connectionNE2004 = SQLiteConnection(NE2004dbpath);
                     connectionNE2004.InsertAll(ballotsindividual);
                     connectionNE2004.Close();
                 }
@@ -267,10 +278,10 @@ namespace Database.IEC
                     IEnumerable<Ballot> ballotsindividual = sqliteConnection.Table<Ballot>()
                         .Where(ballot => ballot.PkElectoralEvent == PE2004ElectoralEvent.Pk);
 
-                    string PE2004dbpath = ElectoralEventPath(directory, PE2004ElectoralEvent, "db");
-                    string PE2004txtpath = ElectoralEventPath(directory, PE2004ElectoralEvent, "txt");
+                    string PE2004dbpath = ElectoralEventPath(DirectoryOutput, PE2004ElectoralEvent, "db");
+                    string PE2004txtpath = ElectoralEventPath(DirectoryOutput, PE2004ElectoralEvent, "txt");
                     PksToText(PE2004txtpath, parameters);
-                    using SQLiteConnection connectionPE2004 = SQLiteConnection(PE2004dbpath, true);
+                    using SQLiteConnection connectionPE2004 = SQLiteConnection(PE2004dbpath);
                     connectionPE2004.InsertAll(ballotsindividual);
                     connectionPE2004.Close();
                 }
@@ -300,11 +311,11 @@ namespace Database.IEC
 				IEnumerable<Ballot> ballotsindividual = sqliteConnection.Table<Ballot>()
                     .Where(ballot => ballot.PkElectoralEvent == LGE2006ElectoralEvent.Pk);
 
-                string LGE2006dbpath = ElectoralEventPath(directory, LGE2006ElectoralEvent, "db");
-                string LGE2006txtpath = ElectoralEventPath(directory, LGE2006ElectoralEvent, "txt");
+                string LGE2006dbpath = ElectoralEventPath(DirectoryOutput, LGE2006ElectoralEvent, "db");
+                string LGE2006txtpath = ElectoralEventPath(DirectoryOutput, LGE2006ElectoralEvent, "txt");
 
                 PksToText(LGE2006txtpath, parameters);
-                using SQLiteConnection connectionLGE2006 = SQLiteConnection(LGE2006dbpath, true);
+                using SQLiteConnection connectionLGE2006 = SQLiteConnection(LGE2006dbpath);
                 connectionLGE2006.InsertAll(ballotsindividual);
                 connectionLGE2006.Close();
             }
@@ -340,10 +351,10 @@ namespace Database.IEC
                     IEnumerable<Ballot> ballotsindividual = sqliteConnection.Table<Ballot>()
                         .Where(ballot => ballot.PkElectoralEvent == NE2009ElectoralEvent.Pk);
 
-                    string NE2009dbpath = ElectoralEventPath(directory, NE2009ElectoralEvent, "db");
-                    string NE2009txtpath = ElectoralEventPath(directory, NE2009ElectoralEvent, "txt");
+                    string NE2009dbpath = ElectoralEventPath(DirectoryOutput, NE2009ElectoralEvent, "db");
+                    string NE2009txtpath = ElectoralEventPath(DirectoryOutput, NE2009ElectoralEvent, "txt");
                     PksToText(NE2009txtpath, parameters);
-                    using SQLiteConnection connectionNE2009 = SQLiteConnection(NE2009dbpath, true);
+                    using SQLiteConnection connectionNE2009 = SQLiteConnection(NE2009dbpath);
                     connectionNE2009.InsertAll(ballotsindividual);
                     connectionNE2009.Close();
                 }
@@ -352,10 +363,10 @@ namespace Database.IEC
                     IEnumerable<Ballot> ballotsindividual = sqliteConnection.Table<Ballot>()
                         .Where(ballot => ballot.PkElectoralEvent == PE2009ElectoralEvent.Pk);
 
-                    string PE2009dbpath = ElectoralEventPath(directory, PE2009ElectoralEvent, "db");
-                    string PE2009txtpath = ElectoralEventPath(directory, PE2009ElectoralEvent, "txt");
+                    string PE2009dbpath = ElectoralEventPath(DirectoryOutput, PE2009ElectoralEvent, "db");
+                    string PE2009txtpath = ElectoralEventPath(DirectoryOutput, PE2009ElectoralEvent, "txt");
                     PksToText(PE2009txtpath, parameters);
-                    using SQLiteConnection connectionPE2009 = SQLiteConnection(PE2009dbpath, true);
+                    using SQLiteConnection connectionPE2009 = SQLiteConnection(PE2009dbpath);
                     connectionPE2009.InsertAll(ballotsindividual);
                     connectionPE2009.Close();
                 }
@@ -385,11 +396,11 @@ namespace Database.IEC
 				IEnumerable<Ballot> ballotsindividual = sqliteConnection.Table<Ballot>()
                     .Where(ballot => ballot.PkElectoralEvent == LGE2011ElectoralEvent.Pk);
 
-                string LGE2011dbpath = ElectoralEventPath(directory, LGE2011ElectoralEvent, "db");
-                string LGE2011txtpath = ElectoralEventPath(directory, LGE2011ElectoralEvent, "txt");
+                string LGE2011dbpath = ElectoralEventPath(DirectoryOutput, LGE2011ElectoralEvent, "db");
+                string LGE2011txtpath = ElectoralEventPath(DirectoryOutput, LGE2011ElectoralEvent, "txt");
 
                 PksToText(LGE2011txtpath, parameters);
-                using SQLiteConnection connectionLGE2011 = SQLiteConnection(LGE2011dbpath, true);
+                using SQLiteConnection connectionLGE2011 = SQLiteConnection(LGE2011dbpath);
                 connectionLGE2011.InsertAll(ballotsindividual);
                 connectionLGE2011.Close();
             }
@@ -425,10 +436,10 @@ namespace Database.IEC
                     IEnumerable<Ballot> ballotsindividual = sqliteConnection.Table<Ballot>()
                         .Where(ballot => ballot.PkElectoralEvent == NE2014ElectoralEvent.Pk);
 
-                    string NE2014dbpath = ElectoralEventPath(directory, NE2014ElectoralEvent, "db");
-                    string NE2014txtpath = ElectoralEventPath(directory, NE2014ElectoralEvent, "txt");
+                    string NE2014dbpath = ElectoralEventPath(DirectoryOutput, NE2014ElectoralEvent, "db");
+                    string NE2014txtpath = ElectoralEventPath(DirectoryOutput, NE2014ElectoralEvent, "txt");
                     PksToText(NE2014txtpath, parameters);
-                    using SQLiteConnection connectionNE2014 = SQLiteConnection(NE2014dbpath, true);
+                    using SQLiteConnection connectionNE2014 = SQLiteConnection(NE2014dbpath);
                     connectionNE2014.InsertAll(ballotsindividual);
                     connectionNE2014.Close();
                 }
@@ -437,10 +448,10 @@ namespace Database.IEC
                     IEnumerable<Ballot> ballotsindividual = sqliteConnection.Table<Ballot>()
                         .Where(ballot => ballot.PkElectoralEvent == PE2014ElectoralEvent.Pk);
 
-                    string PE2014dbpath = ElectoralEventPath(directory, PE2014ElectoralEvent, "db");
-                    string PE2014txtpath = ElectoralEventPath(directory, PE2014ElectoralEvent, "txt");
+                    string PE2014dbpath = ElectoralEventPath(DirectoryOutput, PE2014ElectoralEvent, "db");
+                    string PE2014txtpath = ElectoralEventPath(DirectoryOutput, PE2014ElectoralEvent, "txt");
                     PksToText(PE2014txtpath, parameters);
-                    using SQLiteConnection connectionPE2014 = SQLiteConnection(PE2014dbpath, true);
+                    using SQLiteConnection connectionPE2014 = SQLiteConnection(PE2014dbpath);
                     connectionPE2014.InsertAll(ballotsindividual);
                     connectionPE2014.Close();
                 }
@@ -480,11 +491,11 @@ namespace Database.IEC
 				IEnumerable<Ballot> ballotsindividual = sqliteConnection.Table<Ballot>()
                     .Where(ballot => ballot.PkElectoralEvent == LGE2016ElectoralEvent.Pk);
 
-                string LGE2016dbpath = ElectoralEventPath(directory, LGE2016ElectoralEvent, "db");
-                string LGE2016txtpath = ElectoralEventPath(directory, LGE2016ElectoralEvent, "txt");
+                string LGE2016dbpath = ElectoralEventPath(DirectoryOutput, LGE2016ElectoralEvent, "db");
+                string LGE2016txtpath = ElectoralEventPath(DirectoryOutput, LGE2016ElectoralEvent, "txt");
 
                 PksToText(LGE2016txtpath, parameters);
-                using SQLiteConnection connectionLGE2016 = SQLiteConnection(LGE2016dbpath, true);
+                using SQLiteConnection connectionLGE2016 = SQLiteConnection(LGE2016dbpath);
                 connectionLGE2016.InsertAll(ballotsindividual);
                 connectionLGE2016.Close();
             }
@@ -510,11 +521,11 @@ namespace Database.IEC
                 IEnumerable<Ballot> ballotsindividual = sqliteConnection.Table<Ballot>()
                     .Where(ballot => ballot.PkElectoralEvent == NE2019ElectoralEvent.Pk);
 
-                string NE2019dbpath = ElectoralEventPath(directory, NE2019ElectoralEvent, "db");
-                string NE2019txtpath = ElectoralEventPath(directory, NE2019ElectoralEvent, "txt");
+                string NE2019dbpath = ElectoralEventPath(DirectoryOutput, NE2019ElectoralEvent, "db");
+                string NE2019txtpath = ElectoralEventPath(DirectoryOutput, NE2019ElectoralEvent, "txt");
 
                 PksToText(NE2019txtpath, parameters);
-                using SQLiteConnection connectionNE2019 = SQLiteConnection(NE2019dbpath, true);
+                using SQLiteConnection connectionNE2019 = SQLiteConnection(NE2019dbpath);
                 connectionNE2019.InsertAll(ballotsindividual);
                 connectionNE2019.Close();
             }
@@ -540,11 +551,11 @@ namespace Database.IEC
                 IEnumerable<Ballot> ballotsindividual = sqliteConnection.Table<Ballot>()
                     .Where(ballot => ballot.PkElectoralEvent == PE2019ElectoralEvent.Pk);
 
-                string PE2019dbpath = ElectoralEventPath(directory, PE2019ElectoralEvent, "db");
-                string PE2019txtpath = ElectoralEventPath(directory, PE2019ElectoralEvent, "txt");
+                string PE2019dbpath = ElectoralEventPath(DirectoryOutput, PE2019ElectoralEvent, "db");
+                string PE2019txtpath = ElectoralEventPath(DirectoryOutput, PE2019ElectoralEvent, "txt");
 
                 PksToText(PE2019txtpath, parameters);
-                using SQLiteConnection connectionPE2019 = SQLiteConnection(PE2019dbpath, true);
+                using SQLiteConnection connectionPE2019 = SQLiteConnection(PE2019dbpath);
                 connectionPE2019.InsertAll(ballotsindividual);
                 connectionPE2019.Close();
             }
@@ -583,11 +594,11 @@ namespace Database.IEC
 				IEnumerable<Ballot> ballotsindividual = sqliteConnection.Table<Ballot>()
                     .Where(ballot => ballot.PkElectoralEvent == LGE2021ElectoralEvent.Pk);
 
-                string LGE2021dbpath = ElectoralEventPath(directory, LGE2021ElectoralEvent, "db");
-                string LGE2021txtpath = ElectoralEventPath(directory, LGE2021ElectoralEvent, "txt");
+                string LGE2021dbpath = ElectoralEventPath(DirectoryOutput, LGE2021ElectoralEvent, "db");
+                string LGE2021txtpath = ElectoralEventPath(DirectoryOutput, LGE2021ElectoralEvent, "txt");
 
                 PksToText(LGE2021txtpath, parameters);
-                using SQLiteConnection connectionLGE2021 = SQLiteConnection(LGE2021dbpath, true);
+                using SQLiteConnection connectionLGE2021 = SQLiteConnection(LGE2021dbpath);
                 connectionLGE2021.InsertAll(ballotsindividual);
                 connectionLGE2021.Close();
             }
@@ -613,11 +624,11 @@ namespace Database.IEC
 				IEnumerable<Ballot> ballotsindividual = sqliteConnection.Table<Ballot>()
 					.Where(ballot => ballot.PkElectoralEvent == NE2024ElectoralEvent.Pk);
 
-				string NE2024dbpath = ElectoralEventPath(directory, NE2024ElectoralEvent, "db");
-				string NE2024txtpath = ElectoralEventPath(directory, NE2024ElectoralEvent, "txt");
+				string NE2024dbpath = ElectoralEventPath(DirectoryOutput, NE2024ElectoralEvent, "db");
+				string NE2024txtpath = ElectoralEventPath(DirectoryOutput, NE2024ElectoralEvent, "txt");
 
 				PksToText(NE2024txtpath, parameters);
-				using SQLiteConnection connectionNE2024 = SQLiteConnection(NE2024dbpath, true);
+				using SQLiteConnection connectionNE2024 = SQLiteConnection(NE2024dbpath);
 				connectionNE2024.InsertAll(ballotsindividual);
 				connectionNE2024.Close();
 			}
@@ -643,11 +654,11 @@ namespace Database.IEC
 				IEnumerable<Ballot> ballotsindividual = sqliteConnection.Table<Ballot>()
 					.Where(ballot => ballot.PkElectoralEvent == PE2024ElectoralEvent.Pk);
 
-				string PE2024dbpath = ElectoralEventPath(directory, PE2024ElectoralEvent, "db");
-				string PE2024txtpath = ElectoralEventPath(directory, PE2024ElectoralEvent, "txt");
+				string PE2024dbpath = ElectoralEventPath(DirectoryOutput, PE2024ElectoralEvent, "db");
+				string PE2024txtpath = ElectoralEventPath(DirectoryOutput, PE2024ElectoralEvent, "txt");
 
 				PksToText(PE2024txtpath, parameters);
-				using SQLiteConnection connectionPE2024 = SQLiteConnection(PE2024dbpath, true);
+				using SQLiteConnection connectionPE2024 = SQLiteConnection(PE2024dbpath);
 				connectionPE2024.InsertAll(ballotsindividual);
 				connectionPE2024.Close();
 			}
@@ -673,11 +684,11 @@ namespace Database.IEC
 				IEnumerable<Ballot> ballotsindividual = sqliteConnection.Table<Ballot>()
 					.Where(ballot => ballot.PkElectoralEvent == RE2024ElectoralEvent.Pk);
 
-				string RE2024dbpath = ElectoralEventPath(directory, RE2024ElectoralEvent, "db");
-				string RE2024txtpath = ElectoralEventPath(directory, RE2024ElectoralEvent, "txt");
+				string RE2024dbpath = ElectoralEventPath(DirectoryOutput, RE2024ElectoralEvent, "db");
+				string RE2024txtpath = ElectoralEventPath(DirectoryOutput, RE2024ElectoralEvent, "txt");
 
 				PksToText(RE2024txtpath, parameters);
-				using SQLiteConnection connectionRE2024 = SQLiteConnection(RE2024dbpath, true);
+				using SQLiteConnection connectionRE2024 = SQLiteConnection(RE2024dbpath);
 				connectionRE2024.InsertAll(ballotsindividual);
 				connectionRE2024.Close();
 			}
@@ -693,12 +704,12 @@ namespace Database.IEC
 
             foreach (ElectoralEvent electoralevent in parameters.ElectoralEvents)
             {
-                string dbelectoraleventpath = ElectoralEventPath(directory, electoralevent, "db", out string dbelectoraleventfilename);
-                string txtelectoraleventpath = ElectoralEventPath(directory, electoralevent, "txt");
+                string dbelectoraleventpath = ElectoralEventPath(DirectoryOutput, electoralevent, "db", out string dbelectoraleventfilename);
+                string txtelectoraleventpath = ElectoralEventPath(DirectoryOutput, electoralevent, "txt");
                 
                 if (File.Exists(txtelectoraleventpath) is false) continue;
 
-                using SQLiteConnection sqliteconnectionelectoralevent = SQLiteConnection(dbelectoraleventpath, true);
+                using SQLiteConnection sqliteconnectionelectoralevent = SQLiteConnection(dbelectoraleventpath);
                 using FileStream txtelectoraleventfilestream = File.OpenRead(txtelectoraleventpath);
                 using StreamReader txtelectoraleventstreamreader = new(txtelectoraleventfilestream);
 
@@ -708,31 +719,31 @@ namespace Database.IEC
                     if (values.Length == 1) continue; else
                         switch (values[0])
                         {
-                            case nameof(CSVParameters.Parties):
+                            case nameof(Parameters.Parties):
                                 parameters.Parties = ((IEnumerable<Party>)sqliteConnection.Table<Party>())
                                     .Where(_ => values[1..^0].Contains(_.Pk.ToString()))
                                     .ToList();
                                 break;
 
-                            case nameof(CSVParameters.Provinces):
+                            case nameof(Parameters.Provinces):
                                 parameters.Provinces = ((IEnumerable<Province>)sqliteConnection.Table<Province>())
                                     .Where(_ => values[1..^0].Contains(_.Pk.ToString()))
                                     .ToList();
                                 break;
 
-                            case nameof(CSVParameters.Municipalities):
+                            case nameof(Parameters.Municipalities):
                                 parameters.Municipalities = ((IEnumerable<Municipality>)sqliteConnection.Table<Municipality>())
                                     .Where(_ => values[1..^0].Contains(_.Pk.ToString()))
                                     .ToList();
                                 break;
 
-                            case nameof(CSVParameters.VotingDistricts):
+                            case nameof(Parameters.VotingDistricts):
                                 parameters.VotingDistricts = ((IEnumerable<VotingDistrict>)sqliteConnection.Table<VotingDistrict>())
                                     .Where(_ => values[1..^0].Contains(_.Pk.ToString()))
                                     .ToList();
                                 break;
 
-                            case nameof(CSVParameters.Wards):
+                            case nameof(Parameters.Wards):
                                 parameters.Wards = ((IEnumerable<Ward>)sqliteConnection.Table<Ward>())
                                     .Where(_ => values[1..^0].Contains(_.Pk.ToString()))
                                     .ToList();
@@ -788,32 +799,17 @@ namespace Database.IEC
 			File.Delete(logpath);
 		}
 
-        public static SQLiteConnection SQLiteConnection(string path, bool individual)
+        public static SQLiteConnection SQLiteConnection(string path)
         {
             SQLiteConnection sqliteconnection = new(path);
 
-            if (individual)
-            {
-                sqliteconnection.CreateTable<Ballot>();
-                sqliteconnection.CreateTable<ElectoralEvent>();
-                sqliteconnection.CreateTable<Municipality>();
-                sqliteconnection.CreateTable<Party>();
-                sqliteconnection.CreateTable<Province>();
-                sqliteconnection.CreateTable<VotingDistrict>();
-                sqliteconnection.CreateTable<Ward>();
-            }
-            else
-            {
-                sqliteconnection.CreateTable<Ballot>();
-                sqliteconnection.CreateTable<ElectoralEvent>();
-                sqliteconnection.CreateTable<Municipality>();
-                sqliteconnection.CreateTable<Party>();
-                sqliteconnection.CreateTable<Province>();
-                sqliteconnection.CreateTable<VotingDistrict>();
-                sqliteconnection.CreateTable<Ward>();
-            }
+			sqliteconnection.CreateTable<Ballot>();
+			sqliteconnection.CreateTable<ElectoralEvent>();
+			sqliteconnection.CreateTable<Party>();
+			sqliteconnection.CreateTable<VotingDistrict>();
+			sqliteconnection.CreateTable<Ward>();
 
-            return sqliteconnection;
+			return sqliteconnection;
 
         }
         public static string ZipFile(string filepath)
@@ -844,7 +840,7 @@ namespace Database.IEC
 
 			return gzipfilepath;
 		}
-		public static void PksToText(string path, CSVParameters parameters)
+		public static void PksToText(string path, Parameters parameters)
         {
             if (File.Exists(path)) File.Delete(path);
 
@@ -852,38 +848,38 @@ namespace Database.IEC
             using StreamWriter streamwriter = new(filestream);
 
             if (parameters.Parties is null)
-                streamwriter.WriteLine(nameof(CSVParameters.Parties));
+                streamwriter.WriteLine(nameof(Parameters.Parties));
             else streamwriter.WriteLine(
                 "{0},{1}",
-                nameof(CSVParameters.Parties),
+                nameof(Parameters.Parties),
                 string.Join(',', parameters.Parties.Select(party => party.Pk)));
 
             if (parameters.Provinces is null)
-                streamwriter.WriteLine(nameof(CSVParameters.Provinces));
+                streamwriter.WriteLine(nameof(Parameters.Provinces));
             else streamwriter.WriteLine(
                 "{0},{1}",
-                nameof(CSVParameters.Provinces),
+                nameof(Parameters.Provinces),
                 string.Join(',', parameters.Provinces.Select(province => province.Pk)));
 
             if (parameters.Municipalities is null)
-                streamwriter.WriteLine(nameof(CSVParameters.Municipalities));
+                streamwriter.WriteLine(nameof(Parameters.Municipalities));
             else streamwriter.WriteLine(
                 "{0},{1}",
-                nameof(CSVParameters.Municipalities),
+                nameof(Parameters.Municipalities),
                 string.Join(',', parameters.Municipalities.Select(municipality => municipality.Pk)));
 
             if (parameters.VotingDistricts is null)
-                streamwriter.WriteLine(nameof(CSVParameters.VotingDistricts));
+                streamwriter.WriteLine(nameof(Parameters.VotingDistricts));
             else streamwriter.WriteLine(
                 "{0},{1}",
-                nameof(CSVParameters.VotingDistricts),
+                nameof(Parameters.VotingDistricts),
                 string.Join(',', parameters.VotingDistricts.Select(votingdistrict => votingdistrict.Pk)));
 
             if (parameters.Wards is null)
-                streamwriter.WriteLine(nameof(CSVParameters.Wards));
+                streamwriter.WriteLine(nameof(Parameters.Wards));
             else streamwriter.WriteLine(
                 "{0},{1}",
-                nameof(CSVParameters.Wards),
+                nameof(Parameters.Wards),
                 string.Join(',', parameters.Wards.Select(ward => ward.Pk)));
         }
         public static string ElectoralEventPath(string basedirectory, ElectoralEvent electoralevent, string extension)
@@ -954,7 +950,7 @@ namespace Database.IEC
                         else List_PkParty_Votes.Add(municipality_List_PkParty_Votes[0], municipality_List_PkParty_Votes[1]);
 
                     if (List_PkParty_Votes.OrderByDescending(kvp => kvp.Value).Select(kvp => kvp.Key).FirstOrDefault() is int pkParty)
-                        electoralevent.List_PkMunicipality_PkParty = ElectionsItem.AddPKPairIfUnique(
+                        electoralevent.List_PkMunicipality_PkParty = _TableGeneral.AddPKPairIfUnique(
 							electoralevent.List_PkMunicipality_PkParty, 
                             municipalityBallots.Key.Value, 
                             pkParty, 
