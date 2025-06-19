@@ -7,12 +7,13 @@ using System.Collections.Generic;
 using System.Linq;
 
 using XycloneDesigns.Apis.IEC.Tables;
+using XycloneDesigns.Apis.General.Tables;
 
 namespace System.IO.Compression
 {
 	public static class ZipArchiveExtensions
 	{
-		public static void ReadDataAllocations(this ZipArchive zipArchive, SQLiteConnection sqliteConnection, StreamWriter log)
+		public static void ReadDataElectoralEvents(this ZipArchive zipArchive, SQLiteConnection sqliteConnection, StreamWriter log)
         {
 			using Stream stream = zipArchive.Entries.First(entry => entry.FullName.EndsWith("_ELECTORALEVENTS.csv")).Open();
 			using StreamReader streamReader = new(stream);

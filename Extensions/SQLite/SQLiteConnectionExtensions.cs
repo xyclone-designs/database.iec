@@ -4,58 +4,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Linq.Expressions;
 
 using XycloneDesigns.Apis.General.Tables;
 using XycloneDesigns.Apis.IEC.Tables;
-
-using _TableIEC = XycloneDesigns.Apis.IEC.Tables._Table;
 
 namespace SQLite
 {
     public static class SQLiteConnectionExtensions
     {
-        public static T CreateAndAdd<T>(this SQLiteConnection sqliteConnection, T t) where T : _TableIEC, new()
-        {
-            sqliteConnection.Insert(t);
-
-            return sqliteConnection.Table<T>().Last();
-        }
-        public static T FindOrCreateAndAdd<T>(this SQLiteConnection sqliteConnection, Expression<Func<T, bool>> predicate, Action<T> onCreate) where T : _TableIEC, new()
-        {
-            T? t = null;
-            try { t = sqliteConnection.Find<T>(predicate); } catch (Exception) { }
-            t ??= ((IEnumerable<T>)sqliteConnection.Table<T>()).FirstOrDefault(predicate.Compile());
-            if (t is not null) return t;
-
-            onCreate.Invoke(t = new T());
-            sqliteConnection.Insert(t);
-
-            return sqliteConnection.Table<T>().Last();
-        }
-        public static T FindOrCreateAndAdd<T>(this SQLiteConnection sqliteConnection, int? pk, Action<T> onCreate) where T : _TableIEC, new()
-        {
-            T? t;
-
-            if (pk is null)
-            {
-                onCreate.Invoke(t = new T());
-                sqliteConnection.Insert(t);
-
-                return sqliteConnection.Table<T>().Last();
-            }
-
-            t = sqliteConnection.Find<T>(pk);
-
-            if (t is null)
-            {
-                onCreate.Invoke(t = new T() { Pk = pk.Value });
-                sqliteConnection.Insert(t);
-            }
-
-            return t;
-        }
-
 		public static void CSVNew<TCSVRow>(this SQLiteConnection sqliteConnection, StreamWriter? log, IEnumerable<TCSVRow> rows) where TCSVRow : CSVRow
 		{
 			CSVNewParties(sqliteConnection, log, rows);
@@ -83,10 +39,16 @@ namespace SQLite
 
 				}).ToList();
 
-			log?.WriteLine("Parties - Inserting Names");
+			
 			Console.WriteLine("Parties - Inserting...");
 			sqliteConnection.InsertAll(parties);
-			foreach (Party party in parties) log.WriteLine(party.Name ?? "null");
+
+			if (log is not null)
+			{
+				log.WriteLine("Parties - Inserting Names");
+				foreach (Party party in parties) 
+					log.WriteLine(party.Name ?? "null");
+			}
 
 			return parties;
 		}
@@ -132,10 +94,15 @@ namespace SQLite
 
 					}).ToList();
 
-			log?.WriteLine("Municipalities - Inserting Geos & Names");
 			Console.WriteLine("Municipalities - Inserting...");
 			sqliteConnection.InsertAll(municipalities);
-			foreach (Municipality municipality in municipalities) log.WriteLine("[{0}] - {1}", municipality.GeoCode ?? "_", municipality.Name ?? "null");
+
+			if (log is not null)
+			{
+				log.WriteLine("Municipalities - Inserting Geos & Names");
+				foreach (Municipality municipality in municipalities)
+					log.WriteLine("[{0}] - {1}", municipality.GeoCode ?? "_", municipality.Name ?? "null");
+			}
 
 			return municipalities;
 		}
@@ -154,10 +121,15 @@ namespace SQLite
 
 				}).ToList();
 
-			log?.WriteLine("VotingDistricts - Inserting Ids");
 			Console.WriteLine("VotingDistricts - Inserting...");
 			sqliteConnection.InsertAll(votingdistricts);
-			foreach (VotingDistrict votingdistrict in votingdistricts) log.WriteLine(votingdistrict.Id ?? "null");
+
+			if (log is not null)
+			{
+				log.WriteLine("VotingDistricts - Inserting Ids");
+				foreach (VotingDistrict votingdistrict in votingdistricts)
+					log.WriteLine(votingdistrict.Id ?? "null");
+			}
 
 			return votingdistricts;
 		}
@@ -185,10 +157,15 @@ namespace SQLite
 
 				}).ToList();
 
-			log?.WriteLine("Wards - Inserting Ids");
 			Console.WriteLine("Wards - Inserting...");
 			sqliteConnection.InsertAll(wards);
-			foreach (Ward ward in wards) log.WriteLine(ward.Id ?? "null");
+			
+			if (log is not null)
+			{
+				log.WriteLine("Wards - Inserting Ids");
+				foreach (Ward ward in wards)
+					log.WriteLine(ward.Id ?? "null");
+			}
 
 			return wards;
 		}

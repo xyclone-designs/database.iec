@@ -19,6 +19,8 @@ namespace Database.IEC
     {
 		public static void CSV<TCSVRow>(Parameters<TCSVRow> parameters) where TCSVRow : CSVRow
         {
+			parameters.Rows1 ??= [];
+
             parameters.Ballots = [];
             parameters.BallotsElectoralEvent = [];
             parameters.Parties ??= [];
@@ -35,7 +37,7 @@ namespace Database.IEC
             Ward? currentWard = null;
             Municipality? currentMunicipality = null;
 
-            IOrderedEnumerable<CSVRow> rowsordered = parameters.Rows.OrderBy(row => row.ProvincePk);
+            IOrderedEnumerable<CSVRow> rowsordered = parameters.Rows1.OrderBy(row => row.ProvincePk);
             rowsordered = typeof(TCSVRow) == typeof(NPE1999)
                 ? rowsordered.ThenBy(row => row.MunicipalityName)
                 : rowsordered.ThenBy(row => row.MunicipalityGeo);
@@ -47,7 +49,7 @@ namespace Database.IEC
 
             for (int index = 0; rowsorderedenumerator.MoveNext(); index++)
             {
-                Console.WriteLine("Row {0} / {1}", index, parameters.Rows.Count);
+                Console.WriteLine("Row {0} / {1}", index, parameters.Rows1.Count);
 
                 if (currentBallot is null || ChangeBallot(
                     rowsorderedenumerator.Current,
@@ -81,7 +83,7 @@ namespace Database.IEC
                     {
                         if (parameters.Provinces.Find(currentProvince => currentProvince.Pk == rowsorderedenumerator.Current.ProvincePk) is Province Province)
                             currentProvince = Province;
-                        else if (parameters.SqliteConnection?.Table<Province>().FirstOrDefault(_ => _.Pk == rowsorderedenumerator.Current.ProvincePk) is Province Provincesql)
+                        else if (parameters.SqliteConnectionProvinces?.Table<Province>().FirstOrDefault(_ => _.Pk == rowsorderedenumerator.Current.ProvincePk) is Province Provincesql)
                         {
                             currentProvince = Provincesql;
                             parameters.Provinces.Add(currentProvince);
@@ -149,7 +151,7 @@ namespace Database.IEC
 
                     currentBallot = rowsorderedenumerator.Current.AsBallot(ballot =>
                     {
-                        ballot.PkElectoralEvent ??= parameters.ElectoralEvent?.Pk;
+                        ballot.PkElectoralEvent ??= parameters.ElectoralEvent1?.Pk;
                         ballot.PkProvince ??= currentProvince?.Pk ?? rowsorderedenumerator.Current.ProvincePk;
                         ballot.PkMunicipality ??= currentMunicipality?.Pk;
                         ballot.PkWard ??= currentWard?.Pk;
@@ -157,12 +159,12 @@ namespace Database.IEC
                     });
                     electoralEventBallot ??= rowsorderedenumerator.Current.AsBallot(ballot =>
                     {
-                        ballot.PkElectoralEvent = parameters.ElectoralEvent?.Pk;
+                        ballot.PkElectoralEvent = parameters.ElectoralEvent1?.Pk;
                         ballot.PkProvince = null;
                         ballot.PkMunicipality = null;
                         ballot.PkWard = null;
                         ballot.PkVotingDistrict = null;
-                        if (parameters.ElectoralEvent?.Type?.Contains(ElectoralEvent.Types.Municipal) ?? false)
+                        if (parameters.ElectoralEvent1?.Type?.Contains(ElectoralEvent.Types.Municipal) ?? false)
                             ballot.Type = ElectoralEvent.Types.Municipal;
                     });
                 }
@@ -194,16 +196,16 @@ namespace Database.IEC
 
             if (electoralEventBallot is not null)
             {
-				if (ElectoralEvent.IsMunicipal(parameters.ElectoralEvent?.Type))
+				if (ElectoralEvent.IsMunicipal(parameters.ElectoralEvent1?.Type))
 					electoralEventBallot.VotersRegistered = null;
 
                 if (parameters.SqliteConnection is not null)
                 {
-					electoralEventBallot = parameters.SqliteConnection.CreateAndAdd(electoralEventBallot);
+					electoralEventBallot = parameters.SqliteConnection.InsertAndReturn(electoralEventBallot);
 
 					parameters.BallotsElectoralEvent.Add(electoralEventBallot);
-					if (parameters.ElectoralEvent is not null)
-						parameters.ElectoralEvent.List_PkBallot = _TableGeneral.AddPKIfUnique(parameters.ElectoralEvent.List_PkBallot, electoralEventBallot.Pk);
+					if (parameters.ElectoralEvent1 is not null)
+						parameters.ElectoralEvent1.List_PkBallot = _TableGeneral.AddPKIfUnique(parameters.ElectoralEvent1.List_PkBallot, electoralEventBallot.Pk);
 				}
             }
 
@@ -263,14 +265,14 @@ namespace Database.IEC
 
                 }).OrderBy(_ => _.PkMunicipality.HasValue))
             {
-                Ballot? added = parameters.SqliteConnection?.CreateAndAdd(eventballot);
+                Ballot? added = parameters.SqliteConnection?.InsertAndReturn(eventballot);
                 
                 if (added is not null)
                     parameters.BallotsElectoralEvent.Add(added);
 
-                if (parameters.ElectoralEvent is not null)
+                if (parameters.ElectoralEvent1 is not null)
                 {
-					if (ElectoralEvent.IsMunicipal(parameters.ElectoralEvent.Type))
+					if (ElectoralEvent.IsMunicipal(parameters.ElectoralEvent1.Type))
 					{
 						if (electoralEventBallot is not null)
 							electoralEventBallot.VotersRegistered = Math.Max(
@@ -278,9 +280,9 @@ namespace Database.IEC
 								electoralEventBallot.VotersRegistered ?? 0);
 
 						if (added?.PkMunicipality is null)
-							parameters.ElectoralEvent.List_PkBallot = _TableGeneral.AddPKIfUnique(parameters.ElectoralEvent.List_PkBallot, added?.Pk);
+							parameters.ElectoralEvent1.List_PkBallot = _TableGeneral.AddPKIfUnique(parameters.ElectoralEvent1.List_PkBallot, added?.Pk);
 					}
-					else parameters.ElectoralEvent.List_PkBallot = _TableGeneral.AddPKIfUnique(parameters.ElectoralEvent.List_PkBallot, added?.Pk);
+					else parameters.ElectoralEvent1.List_PkBallot = _TableGeneral.AddPKIfUnique(parameters.ElectoralEvent1.List_PkBallot, added?.Pk);
 				}
             }
 
@@ -288,28 +290,32 @@ namespace Database.IEC
 
             if (parameters.SqliteConnection is not null)
             {
-				Console.WriteLine("Updating ElectoralEvent"); parameters.SqliteConnection.Update(parameters.ElectoralEvent);
-				Console.WriteLine("Updating Provinces"); parameters.SqliteConnection.UpdateAll(parameters.Provinces);
+				Console.WriteLine("Updating ElectoralEvent"); parameters.SqliteConnection.Update(parameters.ElectoralEvent1);
 				Console.WriteLine("Updating VotingDistricts"); parameters.SqliteConnection.UpdateAll(parameters.VotingDistricts);
 				Console.WriteLine("Updating Wards"); parameters.SqliteConnection.UpdateAll(parameters.Wards);
 
 				Console.WriteLine("Inserting Ballots");
-				if (parameters.ElectoralEvent?.Pk != 1 && parameters.ElectoralEvent?.Pk != 2)
+				if (parameters.ElectoralEvent1?.Pk != 1 && parameters.ElectoralEvent1?.Pk != 2)
 					parameters.SqliteConnection.InsertAll(parameters.Ballots);
 
 				Console.WriteLine("Updating Parties");
                 foreach (Party party in parameters.Parties)
-					party.List_PkElectoralEvent = _TableGeneral.AddPKIfUnique(party.List_PkElectoralEvent, parameters.ElectoralEvent?.Pk);
+					party.List_PkElectoralEvent = _TableGeneral.AddPKIfUnique(party.List_PkElectoralEvent, parameters.ElectoralEvent1?.Pk);
 				parameters.SqliteConnection.UpdateAll(parameters.Parties);
 			}
 
-            if (parameters.SqliteConnectionMunicipalities is not null)
+            if (parameters.SqliteConnectionProvinces is not null)
+			{
+				Console.WriteLine("Updating Provinces"); parameters.SqliteConnectionProvinces.UpdateAll(parameters.Provinces);
+			}
+
+			if (parameters.SqliteConnectionMunicipalities is not null)
 			{
 				Console.WriteLine("Updating Municipalities"); parameters.SqliteConnectionMunicipalities.UpdateAll(parameters.Municipalities);
 			}
         
-            if (parameters.ElectoralEvent is not null)
-                parameters.ElectoralEvents?.Add(parameters.ElectoralEvent);
+            if (parameters.ElectoralEvent1 is not null)
+                parameters.ElectoralEvents?.Add(parameters.ElectoralEvent1);
         }
     }
 }

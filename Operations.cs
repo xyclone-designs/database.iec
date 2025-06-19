@@ -6,6 +6,9 @@ using System.IO;
 using System.Linq;
 
 using XycloneDesigns.Apis.IEC.Tables;
+using XycloneDesigns.Apis.General.Tables;
+
+using _TableIEC = XycloneDesigns.Apis.IEC.Tables._Table;
 
 namespace Database.IEC
 {
@@ -17,8 +20,8 @@ namespace Database.IEC
         readonly static List<Ward> Wards = [];
 
         public static void Log<TTable, TCSVRow>(TCSVRow row, StreamWriter writer)
-            where TTable : ElectionsItem
-            where TCSVRow : CSVRow
+            where TTable : _TableIEC
+			where TCSVRow : CSVRow
         {
             void LogMunicipality(CSVRow row)
             {

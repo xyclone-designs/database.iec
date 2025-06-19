@@ -8,7 +8,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-using XycloneDesigns.Apis.IEC.Tables;
+using XycloneDesigns.Apis.General.Tables;
 
 namespace Database.IEC.Utils
 {
