@@ -15,7 +15,6 @@ using XycloneDesigns.Apis.IEC.Tables;
 using XycloneDesigns.Apis.General.Tables;
 
 using _TableGeneral = XycloneDesigns.Apis.General.Tables._Table;
-using Database.IEC.Inputs.XLSs;
 
 namespace Database.IEC
 {
@@ -102,7 +101,7 @@ namespace Database.IEC
                 VotingDistricts = [],
                 Wards = [],
 
-				//SqliteConnection = SQLiteConnection(dbpath),
+				SqliteConnection = SQLiteConnection(dbpath),
 				SqliteConnectionMunicipalities = new SQLiteConnection(dbmunicipalitiespath),
 				SqliteConnectionProvinces = new SQLiteConnection(dbprovincespath),
 			};
@@ -459,8 +458,10 @@ namespace Database.IEC
                 sqliteconnectionelectoralevent.InsertAll(parameters.Wards);
                 sqliteconnectionelectoralevent.Close();
 
-                string dbzipfilename = ZipFile(dbelectoraleventpath);
-				string dbgzipfilename = GZipFile(dbelectoraleventpath);
+                FileInfo dbelectoraleventfileinfo = new (dbelectoraleventpath);
+
+				string dbzipfilename = dbelectoraleventfileinfo.ZipFile();
+				string dbgzipfilename = dbelectoraleventfileinfo.GZipFile();
 
 				apifiles.Add(dbzipfilename.Split('\\').Last(), electoralevent);
 				apifiles.Add(dbgzipfilename.Split('\\').Last(), electoralevent);
@@ -477,8 +478,10 @@ namespace Database.IEC
 			parameters.SqliteConnectionProvinces?.Close();
 			parameters.SqliteConnectionMunicipalities?.Close();
 
-			string zipfilename = ZipFile(dbpath);
-            string gzipfilename = GZipFile(dbpath);
+			FileInfo dbpathfileinfo = new(dbpath);
+
+			string zipfilename = dbpathfileinfo.ZipFile();
+            string gzipfilename = dbpathfileinfo.GZipFile();
 
 			apifiles.Add(zipfilename.Split('\\').Last(), null);
 			apifiles.Add(gzipfilename.Split('\\').Last(), null);
@@ -493,7 +496,7 @@ namespace Database.IEC
 			apifilesstreamwriter.Close();
 			apifilesfilestream.Close();
 
-			ZipFile(logpath);
+            new FileInfo(logpath).ZipFile();
 
 			File.Delete(dbpath);
 			File.Delete(logpath);
@@ -510,36 +513,8 @@ namespace Database.IEC
 			sqliteconnection.CreateTable<Ward>();
 
 			return sqliteconnection;
-
         }
-        public static string ZipFile(string filepath)
-        {
-            string name = filepath.Split("\\").Last();
-            string zipfilepath = filepath + ".zip";
 
-            using FileStream filestream = File.OpenRead(filepath);
-            using FileStream filestreamzip = File.Create(zipfilepath);
-            using ZipArchive ziparchive = new(filestreamzip, ZipArchiveMode.Create, true);
-            using Stream stream = ziparchive
-                .CreateEntry(name)
-                .Open();
-
-            filestream.CopyTo(stream);
-            filestream.Close();
-
-            return zipfilepath;
-        }
-		public static string GZipFile(string filepath)
-		{
-			string gzipfilepath = filepath + ".gz";
-
-			using FileStream filestream = File.OpenRead(filepath);
-			using FileStream filestreamgzip = File.Create(gzipfilepath);
-			
-            GZip.Compress(filestream, filestreamgzip, true, 512, 6);
-
-			return gzipfilepath;
-		}
 		public static void PksToText(string path, Parameters parameters)
         {
             if (File.Exists(path)) File.Delete(path);
