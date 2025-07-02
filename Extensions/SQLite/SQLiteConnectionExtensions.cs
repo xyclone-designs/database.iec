@@ -56,29 +56,26 @@ namespace SQLite
 		{
 			Console.WriteLine("Municipalities");
 			Console.WriteLine("Municipalities - Retrieving...");
-			List<Municipality> municipalities = typeof(TCSVRow) == typeof(NPE1999)
-				? rows
-					.DistinctBy(row => row.MunicipalityName)
-					.Where(row =>
-					{
-						return row.MunicipalityName is not null && sqliteConnection
-							.Table<Municipality>()
-							.Any(municipality => string.Equals(row.MunicipalityName, municipality.Name, StringComparison.OrdinalIgnoreCase)) is false;
 
-					}).Select(row => new Municipality
-					{
-						PkProvince = row.ProvincePk,
-						GeoCode = row.MunicipalityGeo,
-						Name = row.MunicipalityName,
+			List<Municipality> municipalities = [];
+			List<Municipality> _municipalities = [.. sqliteConnection.Table<Municipality>()];
 
-					}).ToList()
-				: rows
-					.DistinctBy(row => row.MunicipalityName)
-					.Where(row =>
-					{
-						return row.MunicipalityName is not null && sqliteConnection
-							.Table<Municipality>()
-							.Any(municipality =>
+			List<TCSVRow> _rows = rows
+				.DistinctBy(row => row.MunicipalityName)
+				.Where(row => row.MunicipalityName is not null)
+				.ToList();
+
+			Console.WriteLine("Municipalities - Inserting...");
+
+			for (int lower = 0, upper = Math.Min(lower + 99, _rows.Count); true; lower = upper + 1, upper = Math.Min(lower + 99, _rows.Count))
+			{
+				Console.WriteLine("Municipalities - Inserting... [{0} - {1}] / {2}", lower, upper, _rows.Count);
+				List<Municipality> municipalities_new = 
+					(typeof(TCSVRow) == typeof(NPE1999)
+						? _rows[lower..upper].Where(row => _municipalities.Any(municipality => string.Equals(row.MunicipalityName, municipality.Name, StringComparison.OrdinalIgnoreCase)) is false)
+						: _rows[lower..upper].Where(row =>
+						{
+							return _municipalities.Any(municipality =>
 							{
 								return
 									string.Equals(row.MunicipalityGeo, municipality.GeoCode, StringComparison.OrdinalIgnoreCase) ||
@@ -86,16 +83,23 @@ namespace SQLite
 
 							}) is false;
 
-					}).Select(row => new Municipality
-					{
-						PkProvince = row.ProvincePk,
-						GeoCode = row.MunicipalityGeo,
-						Name = row.MunicipalityName,
+						})).Select(row => new Municipality
+						{
+							PkProvince = row.ProvincePk,
+							GeoCode = row.MunicipalityGeo,
+							Name = row.MunicipalityName,
 
-					}).ToList();
+						}).ToList();
 
-			Console.WriteLine("Municipalities - Inserting...");
-			sqliteConnection.InsertAll(municipalities);
+				if (municipalities_new.Count > 0)
+					municipalities.AddRange(municipalities_new);				
+
+				if (upper == _rows.Count)
+					break;
+			}
+
+			if (municipalities.Count > 0)
+				sqliteConnection.InsertAll(municipalities);
 
 			if (log is not null)
 			{

@@ -1,5 +1,4 @@
 ﻿using Database.IEC.Inputs.CSVs;
-using Database.IEC.Inputs.XLSs;
 
 using SQLite;
 
@@ -19,6 +18,14 @@ namespace Database.IEC
 			public Parameters() { }
 			public Parameters(Parameters parameters)
 			{
+				NewBallots = parameters.NewBallots;
+				NewElectoralEvents = parameters.NewElectoralEvents;
+				NewParties = parameters.NewParties;
+				NewMunicipalities = parameters.NewMunicipalities;
+				NewProvinces = parameters.NewProvinces;
+				NewVotingDistricts = parameters.NewVotingDistricts;
+				NewWards = parameters.NewWards;
+
 				Ballots = parameters.Ballots;
 				BallotsElectoralEvent = parameters.BallotsElectoralEvent;
 				ElectoralEvents = parameters.ElectoralEvents;
@@ -45,6 +52,25 @@ namespace Database.IEC
 		}
 		public class Parameters
 		{
+			public bool New 
+			{
+				get =>
+					(NewBallots.HasValue && NewBallots.Value) ||
+					(NewElectoralEvents.HasValue && NewElectoralEvents.Value) ||
+					(NewParties.HasValue && NewParties.Value) ||
+					(NewMunicipalities.HasValue && NewMunicipalities.Value) ||
+					(NewProvinces.HasValue && NewProvinces.Value) ||
+					(NewVotingDistricts.HasValue && NewVotingDistricts.Value) ||
+					(NewWards.HasValue && NewWards.Value);
+			}
+			public bool? NewBallots { get; set; }
+			public bool? NewElectoralEvents { get; set; }
+			public bool? NewParties { get; set; }
+			public bool? NewMunicipalities { get; set; }
+			public bool? NewProvinces { get; set; }
+			public bool? NewVotingDistricts { get; set; }
+			public bool? NewWards { get; set; }
+
 			public List<Ballot>? Ballots { get; set; }
 			public List<Ballot>? BallotsElectoralEvent { get; set; }
 			public List<ElectoralEvent>? ElectoralEvents { get; set; }

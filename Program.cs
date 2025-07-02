@@ -20,12 +20,11 @@ namespace Database.IEC
 {
     internal partial class Program
     {
-		//static readonly string DirectoryCurrent = Directory.GetCurrentDirectory();
-		static readonly string DirectoryCurrent = Directory.GetParent(Directory.GetCurrentDirectory())?.Parent?.Parent?.FullName!;
+		static readonly string DirectoryCurrent = Directory.GetCurrentDirectory();
+		//static readonly string DirectoryCurrent = Directory.GetParent(Directory.GetCurrentDirectory())?.Parent?.Parent?.FullName!;
 
 		static readonly string DirectoryOutput = Path.Combine(DirectoryCurrent, ".output");
 		static readonly string DirectoryInput = Path.Combine(DirectoryCurrent, ".input");
-		static readonly string DirectoryInputMunicipalities = Path.Combine(DirectoryInput, ".input");
 
 		static void Main(string[] args)
 		{
@@ -44,31 +43,31 @@ namespace Database.IEC
                 dbprovincespath = Path.Combine(DirectoryOutput, dbprovincesname), 
                 dbpathversioned = Path.Combine(DirectoryOutput, dbnameversioned), 
                 logpath = Path.Combine(DirectoryOutput, logname), 
-                datapath = Path.Combine(DirectoryCurrent, ".inputs", "data.zip");
+                datapath = Path.Combine(DirectoryCurrent, ".input", "data.zip");
 
             int[] pksElectoralEvent =
             [
-                01,
-                02,
-                03,
-                04,
-                05,
-                06,
-                07,
-                08,
-                09,
-                10,
-                11,
-                12,
-                13,
-                14,
-                15,
-                16,
-                17,
-                18,
-                19,
-                20,
-            ];
+				01,
+				02,
+				03,
+				04,
+				05,
+				06,
+				07,
+				08,
+				09,
+				10,
+				11,
+				12,
+				13,
+				14,
+				15,
+				16,
+				17,
+				18,
+				19,
+				20,
+			];
 
 			if (File.Exists(dbpath)) File.Delete(dbpath);
             if (File.Exists(dbpathversioned)) File.Delete(dbpathversioned);
@@ -92,6 +91,8 @@ namespace Database.IEC
 			List<ElectoralEvent> electoralevents = [];
 			Parameters parameters = new()
             {
+				NewMunicipalities = true,
+
 				Logger = logstreamwriter,
 
 				ElectoralEvents = [],
@@ -128,9 +129,6 @@ namespace Database.IEC
 
 				electoralevents = [.. _sqliteconnection.Table<ElectoralEvent>()];
 			}
-
-			if (parameters.SqliteConnectionMunicipalities is not null)
-				datazip.ReadDataMunicipalities(parameters.SqliteConnectionMunicipalities, parameters.Logger);
 
 			// 1994 National
 			if (pksElectoralEvent.Contains(01)) Process(new Parameters<Inputs.CSVs.NE1994>(parameters)

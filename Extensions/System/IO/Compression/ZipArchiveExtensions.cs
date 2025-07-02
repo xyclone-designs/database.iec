@@ -1,5 +1,4 @@
 ﻿using Database.IEC.Inputs.CSVs;
-using Database.IEC.Utils;
 
 using SQLite;
 
@@ -28,7 +27,7 @@ namespace System.IO.Compression
             {
 				foreach (IGrouping<string, string[]> grouped in Read().GroupBy(_ => _[0]))
 				{
-					// Name,abbr,date,designation,party,allocation
+					// name,abbr,date,designation,party,allocation
 
 					IEnumerable<string> allocations = grouped
 						.Where(allocationline =>
@@ -63,19 +62,6 @@ namespace System.IO.Compression
 
 			sqliteConnection.InsertAll(ElectoralEvents());
 		}
-		public static void ReadDataMunicipalities(this ZipArchive zipArchive, SQLiteConnection sqliteConnection, StreamWriter log)
-		{
-			IEnumerable<Municipality> geographies = MunicipalityUtils.ReadFromGeography(zipArchive, log);
-			IEnumerable<Municipality> members = MunicipalityUtils.ReadFromMembers(zipArchive, log);
-
-            sqliteConnection.InsertAll(Enumerable.Empty<Municipality>()
-                .Concat(geographies)
-                .Concat(members)
-				.DistinctBy(municipality => municipality.GeoCode)
-                .OrderBy(municipality => municipality.GeoCode)
-                .ThenBy(municipality => municipality.Name)
-                .ThenBy(municipality => municipality.NameLong));
-        }
         public static void ReadDataProvinces(this ZipArchive zipArchive, SQLiteConnection sqliteConnection, StreamWriter log)
         {
             using Stream stream = zipArchive.Entries.First(entry => entry.FullName.EndsWith("_PROVINCES.csv")).Open();
@@ -90,7 +76,7 @@ namespace System.IO.Compression
 
 			sqliteConnection.InsertAll(Rows().Select(row => new Province
 			{
-				// Id,Name,capital,population,squareKms,urlWebsite
+				// id,name,capital,population,squareKms,urlWebsite
 
 				Id = row[0],
 				Name = row[1],
@@ -118,7 +104,7 @@ namespace System.IO.Compression
 				
 				parties.Add(new Party
 				{
-					// Name,abbr,color,headquarters,urlLogo,urlWebsite
+					// name,abbr,color,headquarters,urlLogo,urlWebsite
 
 					Name = string.Equals("{placeholder}", columns[0]) is false ? columns[0] : null,
 					Abbr = string.Equals("{placeholder}", columns[1]) is false ? columns[1] : null,

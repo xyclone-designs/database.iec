@@ -18,18 +18,30 @@ namespace Database.IEC
 				.Concat(parameters.Rows1 ?? Enumerable.Empty<TCSVRow>())
 				.Concat(parameters.Rows2 ?? Enumerable.Empty<TCSVRow>());
 
-			Console.WriteLine("{0} - New Municipalities", parameters.LoggerTag); parameters.Municipalities =
-				parameters.SqliteConnectionMunicipalities?.CSVNewMunicipalities(parameters.Logger, rows);
+			
+			if (parameters.New is false || (parameters.NewMunicipalities ?? false))
+			{
+				Console.WriteLine("{0} - New Municipalities", parameters.LoggerTag); parameters.Municipalities =
+					parameters.SqliteConnectionMunicipalities?.CSVNewMunicipalities(parameters.Logger, rows);
+			}
+			if (parameters.New is false || (parameters.NewParties ?? false))
+			{
+				Console.WriteLine("{0} - New Parties", parameters.LoggerTag); parameters.Parties =
+					parameters.SqliteConnection?.CSVNewParties(parameters.Logger, rows);
+			}
+			if (parameters.New is false || (parameters.NewVotingDistricts ?? false))
+			{
+				Console.WriteLine("{0} - New VotingDistricts", parameters.LoggerTag); parameters.VotingDistricts =
+					parameters.SqliteConnection?.CSVNewVotingDistricts(parameters.Logger, rows);
+			}
+			if (parameters.New is false || (parameters.NewWards ?? false))
+			{
+				Console.WriteLine("{0} - New Wards", parameters.LoggerTag); parameters.Wards =
+					parameters.SqliteConnection?.CSVNewWards(parameters.Logger, rows);
+			}
 
-			Console.WriteLine("{0} - New Parties", parameters.LoggerTag); parameters.Parties = 
-				parameters.SqliteConnection?.CSVNewParties(parameters.Logger, rows);
-			
-			Console.WriteLine("{0} - New VotingDistricts", parameters.LoggerTag); parameters.VotingDistricts = 
-				parameters.SqliteConnection?.CSVNewVotingDistricts(parameters.Logger, rows);
-			
-			Console.WriteLine("{0} - New Wards", parameters.LoggerTag); parameters.Wards = 
-				parameters.SqliteConnection?.CSVNewWards(parameters.Logger, rows);
-			
+			if (parameters.New) return;
+
 			Console.WriteLine("{0} - Inputs.CSVs.CSV", parameters.LoggerTag);
 
 			if (parameters.ElectoralEvent1 is not null && parameters.Rows1 is not null)
