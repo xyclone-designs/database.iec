@@ -14,21 +14,21 @@ using System.Linq;
 using XycloneDesigns.Apis.IEC.Tables;
 using XycloneDesigns.Apis.General.Tables;
 
-using _TableGeneral = XycloneDesigns.Apis.General.Tables._Table;
+using _TableGeneral = XycloneDesigns.Apis.General.Tables.GeneralTable;
 
 namespace Database.IEC
 {
     internal partial class Program
     {
-		static readonly string DirectoryCurrent = Directory.GetCurrentDirectory();
-		//static readonly string DirectoryCurrent = Directory.GetParent(Directory.GetCurrentDirectory())?.Parent?.Parent?.FullName!;
+		// static readonly string DirectoryCurrent = Directory.GetCurrentDirectory();
+		static readonly string DirectoryCurrent = Directory.GetParent(Directory.GetCurrentDirectory())?.Parent?.Parent?.FullName!;
 
 		static readonly string DirectoryOutput = Path.Combine(DirectoryCurrent, ".output");
 		static readonly string DirectoryInput = Path.Combine(DirectoryCurrent, ".input");
 
 		static void Main(string[] args)
 		{
-			if (Directory.Exists(DirectoryOutput)) Directory.Delete(DirectoryOutput, true); Directory.CreateDirectory(DirectoryOutput);
+            // if (Directory.Exists(DirectoryOutput)) Directory.Delete(DirectoryOutput, true); Directory.CreateDirectory(DirectoryOutput);
 
 			string 
                 dbname = "iec.db", 
@@ -46,27 +46,28 @@ namespace Database.IEC
                 datapath = Path.Combine(DirectoryCurrent, ".input", "data.zip");
 
             int[] pksElectoralEvent =
-            [
-				01,
-				02,
-				03,
-				04,
-				05,
-				06,
-				07,
-				08,
-				09,
-				10,
-				11,
-				12,
-				13,
-				14,
-				15,
-				16,
-				17,
-				18,
-				19,
-				20,
+            [	
+				// 01,
+				// 02,
+				// 03,
+				// 04,
+				// 05,
+				// 06,
+				// 07,
+				// 08,
+				// 09,
+				// 10,
+				// 11,
+				// 12,
+				// 13,
+				// 14,
+				// 15,
+				// 16,
+				// 17,
+				// 18,
+				// 19,
+				// 20,
+				21,
 			];
 
 			if (File.Exists(dbpath)) File.Delete(dbpath);
@@ -384,9 +385,39 @@ namespace Database.IEC
 					.ToList(),
 			});
 
-			#region Indiviuals
+            // 2026 Municipal
+            if (pksElectoralEvent.Contains(21)) Process(new Parameters<Inputs.CSVs.LGE2026>(parameters)
+            {
+                LoggerTag = "LGE2026",
+                ElectoralEvent1 = electoralevents.First(_ => Inputs.CSVs.LGE2026.IsElectoralEvent(_)),
+                Rows1 = UtilsCSVRows<Inputs.CSVs.LGE2026>(
+                    logstreamwriter,
+                    datazip.Entries.First(entry => entry.FullName.EndsWith("2026 LGE EC.csv")).Open(),
+                    datazip.Entries.First(entry => entry.FullName.EndsWith("2026 LGE FS.csv")).Open(),
+                    datazip.Entries.First(entry => entry.FullName.EndsWith("2026 LGE GP.csv")).Open(),
+                    datazip.Entries.First(entry => entry.FullName.EndsWith("2026 LGE KZN.csv")).Open(),
+                    datazip.Entries.First(entry => entry.FullName.EndsWith("2026 LGE LIM.csv")).Open(),
+                    datazip.Entries.First(entry => entry.FullName.EndsWith("2026 LGE MP.csv")).Open(),
+                    datazip.Entries.First(entry => entry.FullName.EndsWith("2026 LGE NC.csv")).Open(),
+                    datazip.Entries.First(entry => entry.FullName.EndsWith("2026 LGE NW.csv")).Open(),
+                    datazip.Entries.First(entry => entry.FullName.EndsWith("2026 LGE WP.csv")).Open()).ToList(),
+                ExtraAction = parametersextra =>
+                {
+                    if (parametersextra.SqliteConnection is null || parametersextra.ElectoralEvent1 is null)
+                        return;
 
-			parameters.Ballots?.Clear();
+                    XLS<Inputs.XLSs.LGE2026, Inputs.XLSs.LGE2026.Row>(
+                        parametersextra.SqliteConnection,
+                        parametersextra.ElectoralEvent1,
+                        UtilsXLSSeats(datazip, "LGE2026", dataset => new Inputs.XLSs.LGE2026(dataset)).ToList());
+
+                    ElectoralEventLGEUpdate(parametersextra.SqliteConnection, parametersextra.ElectoralEvent1, parametersextra.SqliteConnection.Table<Ballot>());
+                }
+            });
+
+            #region Indiviuals
+
+            parameters.Ballots?.Clear();
             parameters.Municipalities?.Clear();
             parameters.Parties?.Clear();
             parameters.Provinces?.Clear();
@@ -583,6 +614,7 @@ namespace Database.IEC
                 18 => "NE.2024",
                 19 => "PE.2024",
                 20 => "RE.2024",
+                21 => "LGE.2026",
 
                 _ => throw new Exception(string.Format("Electoral Event PK '{0}' ?", electoralevent.Pk))
 

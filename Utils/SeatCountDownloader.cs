@@ -16,6 +16,7 @@ namespace Database.IEC.Utils
 		static readonly string LGE2011Base = "https://results.elections.org.za/home/LGEPublicReports/197/Seat%20Calculation%20Detail";
 		static readonly string LGE2016Base = "https://results.elections.org.za/home/LGEPublicReports/402/Seat%20Calculation%20Detail";
 		static readonly string LGE2021Base = "https://results.elections.org.za/home/LGEPublicReports/1091/Seat%20Calculation%20Detail";
+		static readonly string LGE2026Base = "https://results.elections.org.za/home/LGEPublicReports/1887/Seat%20Calculation%20Detail";
 
 		static string[][] LGE2000ProvincesMunicipalities = new string[][] {
 			new string[] 
@@ -100,7 +101,8 @@ namespace Database.IEC.Utils
 				"NCDMA06", "NCDMA07", "NCDMA08", "NCDMA09", "NCDMACB1",
 				"NW1a1"
 			},
-			new string[] {
+			new string[] 
+			{
 				"Cape Town",
 				"WC011",
 				"WC012",
@@ -134,7 +136,8 @@ namespace Database.IEC.Utils
 			},
 		};
 		static string[][] LGE2006ProvincesMunicipalities = new string[][] {
-			new string[] {
+			new string[] 
+			{
 				"EC05b2",
 				"EC05b3",
 				"EC101",
@@ -177,7 +180,8 @@ namespace Database.IEC.Utils
 				"ECDMA13",
 				"NMA"
 			},
-			new string[] {
+			new string[] 
+			{
 				"FS161",
 				"FS162",
 				"FS163",
@@ -200,7 +204,8 @@ namespace Database.IEC.Utils
 				"FS205",
 				"FSDMA19"
 			},
-			new string[] {
+			new string[] 
+			{
 				"EKU",
 				"GT02b1",
 				"GT02b2",
@@ -214,7 +219,8 @@ namespace Database.IEC.Utils
 				"JHB",
 				"TSH"
 			},
-			new string[] {
+			new string[] 
+			{
 				"ETH",
 				"KZ211",
 				"KZ212",
@@ -271,7 +277,8 @@ namespace Database.IEC.Utils
 				"KZDMA27",
 				"KZDMA43"
 			},
-			new string[] {
+			new string[] 
+			{
 				"NP03A2",
 				"NP03A3",
 				"NP03a4",
@@ -299,7 +306,8 @@ namespace Database.IEC.Utils
 				"NP367",
 				"NPDMA33"
 			},
-			new string[] {
+			new string[] 
+			{
 				"MP301",
 				"MP302",
 				"MP303",
@@ -320,7 +328,8 @@ namespace Database.IEC.Utils
 				"MP325",
 				"MPDMA32"
 			},
-			new string[] {
+			new string[] 
+			{
 				"NW371",
 				"NW372",
 				"NW373",
@@ -343,7 +352,8 @@ namespace Database.IEC.Utils
 				"NW404",
 				"NW405",
 			},
-			new string[] {
+			new string[] 
+			{
 				"NC061",
 				"NC062",
 				"NC064",
@@ -377,7 +387,8 @@ namespace Database.IEC.Utils
 				"NCDMA09",
 				"NCDMA45"
 			},
-			new string[] {
+			new string[] 
+			{
 				"CPT",
 				"WC011",
 				"WC012",
@@ -411,7 +422,8 @@ namespace Database.IEC.Utils
 			}
 		};
 		static string[][] LGE2011ProvincesMunicipalities = new string[][] {
-			new string[] {
+			new string[] 
+			{
 				"BUF",
 				"DC10",
 				"DC12",
@@ -458,7 +470,8 @@ namespace Database.IEC.Utils
 				"EC444",
 				"NMA"
 			},
-			new string[] {
+			new string[] 
+			{
 				"DC16",
 				"DC18",
 				"DC19",
@@ -484,7 +497,8 @@ namespace Database.IEC.Utils
 				"FS205",
 				"MAN"
 			},
-			new string[] {
+			new string[] 
+			{
 				"DC42",
 				"DC48",
 				"EKU",
@@ -498,7 +512,8 @@ namespace Database.IEC.Utils
 				"JHB",
 				"TSH"
 			},
-			new string[] {
+			new string[] 
+			{
 				"DC21",
 				"DC22",
 				"DC23",
@@ -561,7 +576,8 @@ namespace Database.IEC.Utils
 				"KZN434",
 				"KZN435"
 			},
-			new string[] {
+			new string[] 
+			{
 				"DC33",
 				"DC34",
 				"DC35",
@@ -593,7 +609,8 @@ namespace Database.IEC.Utils
 				"LIM474",
 				"LIM475"
 			},
-			new string[] {
+			new string[] 
+			{
 				"DC30",
 				"DC31",
 				"DC32",
@@ -616,7 +633,8 @@ namespace Database.IEC.Utils
 				"MP324",
 				"MP325"
 			},
-			new string[] {
+			new string[] 
+			{
 				"DC37",
 				"DC38",
 				"DC39",
@@ -641,7 +659,8 @@ namespace Database.IEC.Utils
 				"NW403",
 				"NW404"
 			},
-			new string[] {
+			new string[] 
+			{
 				"DC6",
 				"DC7",
 				"DC8",
@@ -674,7 +693,8 @@ namespace Database.IEC.Utils
 				"NC452",
 				"NC453"
 			},
-			new string[] {
+			new string[] 
+			{
 				"CPT",
 				"DC1",
 				"DC2",
@@ -708,7 +728,8 @@ namespace Database.IEC.Utils
 			},
 		};
 		static string[][] LGE2016ProvincesMunicipalities = new string[][] {
-			new string[] {
+			new string[] 
+			{
 				"BUF",
 				"DC10",
 				"DC12",
@@ -749,7 +770,8 @@ namespace Database.IEC.Utils
 				"EC444",
 				"NMA"
 			},
-			new string[] {
+			new string[] 
+			{
 				"DC16",
 				"DC18",
 				"DC19",
@@ -774,7 +796,8 @@ namespace Database.IEC.Utils
 				"FS205",
 				"MAN"
 			},
-			new string[] {
+			new string[] 
+			{
 				"DC42",
 				"DC48",
 				"EKU",
@@ -787,7 +810,8 @@ namespace Database.IEC.Utils
 				"JHB",
 				"TSH"
 			},
-			new string[] {
+			new string[] 
+			{
 				"DC21",
 				"DC22",
 				"DC23",
@@ -843,7 +867,8 @@ namespace Database.IEC.Utils
 				"KZN435",
 				"KZN436"
 			},
-			new string[] {
+			new string[] 
+			{
 				"DC33",
 				"DC34",
 				"DC35",
@@ -872,7 +897,8 @@ namespace Database.IEC.Utils
 				"LIM473",
 				"LIM476"
 			},
-			new string[] {
+			new string[] 
+			{
 				"DC30",
 				"DC31",
 				"DC32",
@@ -894,7 +920,8 @@ namespace Database.IEC.Utils
 				"MP325",
 				"MP326",
 			},
-			new string[] {
+			new string[] 
+			{
 				"DC37",
 				"DC38",
 				"DC39",
@@ -918,7 +945,8 @@ namespace Database.IEC.Utils
 				"NW404",
 				"NW405"
 			},
-			new string[] {
+			new string[] 
+			{
 				"DC45", "DC6", "DC7", "DC8", "DC9",
 				"NC061", "NC062", "NC064", "NC065", "NC066", "NC067",
 				"NC071", "NC072", "NC073", "NC074", "NC075", "NC076", "NC077", "NC078",
@@ -937,9 +965,9 @@ namespace Database.IEC.Utils
 				"WC051", "WC052", "WC053",
 			},
 		};
-		static string[][] LGE2021ProvincesMunicipalities = new string[][]
-		{
-			new string[] {
+		static string[][] LGE2021ProvincesMunicipalities = new string[][] {
+			new string[] 
+			{
 				"BUF",
 				"DC12", "DC13", "DC14", "DC15", "DC44",
 				"EC101", "EC102", "EC104", "EC105", "EC106", "EC108", "EC109",
@@ -950,21 +978,24 @@ namespace Database.IEC.Utils
 				"EC441", "EC442", "EC443", "EC444",
 				"NMA",
 			},
-			new string[] {
+			new string[] 
+			{
 				"DC16", "DC18", "DC19", "DC20",
 				"FS161", "FS162", "FS163", "FS181", "FS182", "FS183", "FS184", "FS185",
 				"FS191", "FS192", "FS193", "FS194", "FS195", "FS196",
 				"FS201", "FS203", "FS204", "FS205",
 				"MAN",
 			},
-			new string[] {
+			new string[] 
+			{
 				"DC42", "DC48",
 				"EKU",
 				"GT421", "GT422", "GT423", "GT481", "GT484", "GT485",
 				"JHB",
 				"TSH",
 			},
-			new string[] {
+			new string[] 
+			{
 				"DC21", "DC22", "DC23", "DC24", "DC25", "DC26", "DC27", "DC28", "DC29", "DC43",
 				"ETH",
 				"KZN212", "KZN213", "KZN214", "KZN216",
@@ -978,7 +1009,8 @@ namespace Database.IEC.Utils
 				"KZN291", "KZN292", "KZN293", "KZN294",
 				"KZN433", "KZN434", "KZN435", "KZN436",
 			},
-			new string[] {
+			new string[] 
+			{
 				"DC33", "DC34", "DC35", "DC36", "DC47",
 				"LIM331", "LIM332", "LIM333", "LIM334", "LIM335",
 				"LIM341", "LIM343", "LIM344", "LIM345",
@@ -986,20 +1018,23 @@ namespace Database.IEC.Utils
 				"LIM361", "LIM362", "LIM366", "LIM367", "LIM368",
 				"LIM471", "LIM472", "LIM473", "LIM476",
 			},
-			new string[] {
+			new string[] 
+			{
 				"DC30", "DC31", "DC32",
 				"MP301", "MP302", "MP303", "MP304", "MP305", "MP306", "MP307",
 				"MP311", "MP312", "MP313", "MP314", "MP315", "MP316",
 				"MP321", "MP324", "MP325", "MP326"
 			},
-			new string[] {
+			new string[] 
+			{
 				"DC37", "DC38", "DC39", "DC40",
 				"NW371", "NW372", "NW373", "NW374", "NW375",
 				"NW381", "NW382", "NW383", "NW384", "NW385",
 				"NW392", "NW393", "NW394", "NW396", "NW397",
 				"NW403", "NW404", "NW405",
 			},
-			new string[] {
+			new string[] 
+			{
 				"DC45", "DC6", "DC7", "DC8", "DC9",
 				"NC061", "NC062", "NC064", "NC065", "NC066", "NC067",
 				"NC071", "NC072", "NC073", "NC074", "NC075", "NC076", "NC077", "NC078",
@@ -1018,8 +1053,89 @@ namespace Database.IEC.Utils
 				"WC051", "WC052", "WC053"
 			},
 		};
+        static string[][] LGE2026ProvincesMunicipalities = new string[][] {
+            new string[] {
+                "BUF",
+                "DC10", "DC12", "DC13", "DC14", "DC15", "DC44",
+                "EC101", "EC102", "EC104", "EC105", "EC106", "EC108", "EC109",
+                "EC121", "EC122", "EC123", "EC124", "EC126", "EC129",
+                "EC131", "EC135", "EC136", "EC137", "EC138", "EC139",
+                "EC141", "EC142", "EC145",
+                "EC153", "EC154", "EC155", "EC156", "EC157",
+                "EC441", "EC442", "EC443", "EC444",
+                "NMA",
+            },
+            new string[] {
+                "DC16", "DC18", "DC19", "DC20",
+                "FS161", "FS162", "FS163", 
+				"FS181", "FS182", "FS183", "FS184", "FS185",
+                "FS191", "FS192", "FS193", "FS194", "FS195", "FS196",
+                "FS201", "FS203", "FS204", "FS205",
+                "MAN",
+            },
+            new string[] {
+                "DC42", "DC48",
+                "EKU",
+                "GT421", "GT422", "GT423", "GT481", "GT484", "GT485",
+                "JHB",
+                "TSH",
+            },
+            new string[] {
+                "DC21", "DC22", "DC23", "DC24", "DC25", "DC26", "DC27", "DC28", "DC29", "DC43",
+                "ETH",
+                "KZN212", "KZN213", "KZN214", "KZN216",
+                "KZN221", "KZN222", "KZN223", "KZN224", "KZN225", "KZN226", "KZN227",
+                "KZN235", "KZN237", "KZN238",
+                "KZN241", "KZN242", "KZN244", "KZN245",
+                "KZN252", "KZN253", "KZN254",
+                "KZN261", "KZN262", "KZN263", "KZN265", "KZN266",
+                "KZN271", "KZN272", "KZN275", "KZN276",
+                "KZN281", "KZN282", "KZN284", "KZN285", "KZN286",
+                "KZN291", "KZN292", "KZN293", "KZN294",
+                "KZN433", "KZN434", "KZN435", "KZN436",
+            },
+            new string[] {
+                "DC33", "DC34", "DC35", "DC36", "DC47",
+                "LIM331", "LIM332", "LIM333", "LIM334", "LIM335",
+                "LIM341", "LIM343", "LIM344", "LIM345",
+                "LIM351", "LIM353", "LIM354", "LIM355",
+                "LIM361", "LIM362", "LIM366", "LIM367", "LIM368",
+                "LIM471", "LIM472", "LIM473", "LIM476",
+            },
+            new string[] {
+                "DC30", "DC31", "DC32",
+                "MP301", "MP302", "MP303", "MP304", "MP305", "MP306", "MP307",
+                "MP311", "MP312", "MP313", "MP314", "MP315", "MP316",
+                "MP321", "MP324", "MP325", "MP326",
+            },
+            new string[] {
+                "DC37", "DC38", "DC39", "DC40",
+                "NW371", "NW372", "NW373", "NW374", "NW375",
+                "NW381", "NW382", "NW383", "NW384", "NW385",
+                "NW392", "NW393", "NW394", "NW396", "NW397",
+                "NW403", "NW404", "NW405",
+            },
+            new string[] {
+                "DC45", "DC6", "DC7", "DC8", "DC9",
+                "NC061", "NC062", "NC064", "NC065", "NC066", "NC067",
+                "NC071", "NC072", "NC073", "NC074", "NC075", "NC076", "NC077", "NC078",
+                "NC082", "NC084", "NC085", "NC086", "NC087",
+                "NC091", "NC092", "NC093", "NC094",
+                "NC451", "NC452", "NC453"
+            },
+            new string[]
+            {
+                "CPT",
+                "DC1", "DC2", "DC3", "DC4", "DC5",
+                "WC011", "WC012", "WC013", "WC014", "WC015",
+                "WC022", "WC023", "WC024", "WC025", "WC026",
+                "WC031", "WC032", "WC033", "WC034",
+                "WC041", "WC042", "WC043", "WC044", "WC045", "WC047", "WC048",
+                "WC051", "WC052", "WC053"
+            },
+        };
 
-		public static void DownloadSeatCounts(params int[] pks)
+        public static void DownloadSeatCounts(params int[] pks)
 		{
 			string directory = Path.Combine(Directory.GetCurrentDirectory(), "lge-seats");
 			string logpath = Path.Combine(directory, "log.txt");
@@ -1040,6 +1156,7 @@ namespace Database.IEC.Utils
 					11 => ("LGE2011", LGE2011Base, LGE2011ProvincesMunicipalities),
 					14 => ("LGE2016", LGE2016Base, LGE2016ProvincesMunicipalities),
 					17 => ("LGE2021", LGE2021Base, LGE2021ProvincesMunicipalities),
+					21 => ("LGE2026", LGE2026Base, LGE2026ProvincesMunicipalities),
 
 					_ => (null as string, null as string, null as string[][])
 				};
@@ -1068,35 +1185,35 @@ namespace Database.IEC.Utils
 					return (file.Replace('/', '_'), new Uri(uri));
 				}));
 			});
-			Task[] tasks = files.Select(file => 
-			{
-				return Task.Run(async () =>
-				{
-					string filename = Path.Combine(directory, file.name);
-					if (File.Exists(filename) is false)
-						try
-						{
-							Console.WriteLine("Querying '{0}'", file.uri);
+			Task[] tasks = [.. files.Select(file =>
+            {
+                return Task.Run(async () =>
+                {
+                    string filename = Path.Combine(directory, file.name);
+                    if (File.Exists(filename) is false)
+                        try
+                        {
+                            Console.WriteLine("Querying '{0}'", file.uri);
 
-							using HttpRequestMessage request = new(HttpMethod.Get, file.uri);
-							using HttpResponseMessage response = await client.SendAsync(request);
-							if (response.IsSuccessStatusCode is false)
-								throw new HttpRequestException(string.Format("Querying at '{0}' unsuccessfull. Code: {1}", file.uri, response.StatusCode));
-							using FileStream fileStream = File.Open(filename, FileMode.OpenOrCreate);
-							await response.Content.CopyToAsync(fileStream);
-							lock (logstreamwriter)
-								logstreamwriter.WriteLine("Querying '{0}' successfull", file.uri);
-						}
-						catch (Exception ex)
-						{
-							Console.WriteLine("Querying '{0}' failed", file.uri);
-							lock (logstreamwriter)
-								logstreamwriter.WriteLine(ex.Message);
-						}
+                            using HttpRequestMessage request = new(HttpMethod.Get, file.uri);
+                            using HttpResponseMessage response = await client.SendAsync(request);
+                            if (response.IsSuccessStatusCode is false)
+                                throw new HttpRequestException(string.Format("Querying at '{0}' unsuccessfull. Code: {1}", file.uri, response.StatusCode));
+                            using FileStream fileStream = File.Open(filename, FileMode.OpenOrCreate);
+                            await response.Content.CopyToAsync(fileStream);
+                            lock (logstreamwriter)
+                                logstreamwriter.WriteLine("Querying '{0}' successfull", file.uri);
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine("Querying '{0}' failed", file.uri);
+                            lock (logstreamwriter)
+                                logstreamwriter.WriteLine(ex.Message);
+                        }
 
-					return Task.CompletedTask;
-				});
-			}).ToArray();
+                    return Task.CompletedTask;
+                });
+            })];
 
 			Task.WaitAll(tasks);
 		}

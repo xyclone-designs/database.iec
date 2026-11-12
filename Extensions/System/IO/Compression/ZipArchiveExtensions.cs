@@ -74,11 +74,11 @@ namespace System.IO.Compression
 					yield return columns;
 			}
 
-			sqliteConnection.InsertAll(Rows().Select(row => new Province
+            sqliteConnection.InsertAll(Rows().Select(row => new Province
 			{
-				// id,name,capital,population,squareKms,urlWebsite
-
-				Id = row[0],
+				// code,name,capital,population,squareKms,urlWebsite
+				
+				Code = row[0],
 				Name = row[1],
 				Capital = row[2],
 				Population = int.Parse(row[3]),

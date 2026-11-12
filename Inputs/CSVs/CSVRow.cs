@@ -238,6 +238,8 @@ namespace Database.IEC.Inputs.CSVs
                         _ => throw new Exception("2024 ElectoralEvent with no type")
                     },
 
+                    true when row.Contains("2026") => 21,
+
                     _ => throw new Exception("ElectoralEvent with no type"),
                 };
             }

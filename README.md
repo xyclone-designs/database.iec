@@ -18,6 +18,7 @@ Data for the following elections is present
 - 2019 National 
 - 2019 Provincial 
 - 2021 Municipal 
+- 2026 Municipal 
 
 # Data Sources
 

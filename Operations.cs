@@ -8,7 +8,7 @@ using System.Linq;
 using XycloneDesigns.Apis.IEC.Tables;
 using XycloneDesigns.Apis.General.Tables;
 
-using _TableIEC = XycloneDesigns.Apis.IEC.Tables._Table;
+using _TableIEC = XycloneDesigns.Apis.IEC.Tables.IECTable;
 
 namespace Database.IEC
 {

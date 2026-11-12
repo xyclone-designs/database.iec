@@ -51,6 +51,7 @@ namespace Database.IEC
                             true when typeof(TCSVRow) == typeof(Inputs.CSVs.NE2024) => new Inputs.CSVs.NE2024(line) { LineNumber = linecurrent } as TCSVRow,
                             true when typeof(TCSVRow) == typeof(Inputs.CSVs.PE2024) => new Inputs.CSVs.PE2024(line) { LineNumber = linecurrent } as TCSVRow,
                             true when typeof(TCSVRow) == typeof(Inputs.CSVs.RE2024) => new Inputs.CSVs.RE2024(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(Inputs.CSVs.LGE2026) => new Inputs.CSVs.LGE2026(line) { LineNumber = linecurrent } as TCSVRow,
 
                             _ => throw new Exception(),
                         };
@@ -96,6 +97,7 @@ namespace Database.IEC
                             true when typeof(TCSVRow) == typeof(Inputs.CSVs.NE2024) => new Inputs.CSVs.NE2024(line) { LineNumber = linecurrent } as TCSVRow,
                             true when typeof(TCSVRow) == typeof(Inputs.CSVs.PE2024) => new Inputs.CSVs.PE2024(line) { LineNumber = linecurrent } as TCSVRow,
                             true when typeof(TCSVRow) == typeof(Inputs.CSVs.RE2024) => new Inputs.CSVs.RE2024(line) { LineNumber = linecurrent } as TCSVRow,
+                            true when typeof(TCSVRow) == typeof(Inputs.CSVs.LGE2026) => new Inputs.CSVs.LGE2026(line) { LineNumber = linecurrent } as TCSVRow,
 
                             _ => throw new Exception(),
                         };
