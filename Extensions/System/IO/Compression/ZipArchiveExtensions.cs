@@ -1,4 +1,4 @@
-﻿using Database.IEC.Inputs.CSVs;
+﻿using Database.IEC.Inputs;
 
 using SQLite;
 
@@ -48,7 +48,7 @@ namespace System.IO.Compression
 
 					yield return new ElectoralEvent
 					{
-						Pk = CSVRow.Utils.RowToElectoralEvent(grouped.First()[0]) ?? throw new Exception(),
+						Pk = CSV.Utils.RowToElectoralEvent(grouped.First()[0]) ?? throw new Exception(),
 						Abbr = grouped.First()[1],
 						Date = grouped.First()[2],
 						Name = grouped.First()[0],
@@ -71,7 +71,8 @@ namespace System.IO.Compression
 			IEnumerable<string[]> Rows()
 			{
 				while (streamReader.ReadLine()?.Split(',') is string[] columns && string.IsNullOrWhiteSpace(columns[0]) is false)
-					yield return columns;
+					if (sqliteConnection.Table<Province>().Any(_ => _.Code == columns[0]) is false)
+						yield return columns;
 			}
 
             sqliteConnection.InsertAll(Rows().Select(row => new Province
@@ -117,5 +118,11 @@ namespace System.IO.Compression
 
 			sqliteConnection.InsertAll(parties);
 		}
+
+		public static IEnumerable<Stream> EntriesThatEndWith(this ZipArchive zipArchive, params string[] filenames) 
+		{
+			foreach (string filename in filenames)
+				yield return zipArchive.Entries.First(entry => entry.FullName.EndsWith(filename)).Open();
+        }
     }
 }

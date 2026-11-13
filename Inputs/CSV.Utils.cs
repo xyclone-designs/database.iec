@@ -3,59 +3,10 @@ using System.Linq;
 
 using XycloneDesigns.Apis.IEC.Tables;
 
-namespace Database.IEC.Inputs.CSVs
+namespace Database.IEC.Inputs
 {
-    public abstract class CSVRow
+    public static partial class CSV
     {
-        public CSVRow(string line)
-        {
-            Line = line;
-        }
-
-        public string? Line { get; set; }
-        public int? LineNumber { get; set; }
-        public string? Electoralevent { get; set; }
-        public int ElectoralEventPk 
-        {
-            get 
-            {
-                return Utils.RowToElectoralEvent(Electoralevent ?? throw new Exception("No ElectoralEvent")) ?? throw new Exception("Errorneous ElectoralEvent");
-            }
-        }
-        public string? MunicipalityGeo { get; set; }
-        public string? MunicipalityName { get; set; }
-        public int? PartyVotes { get; set; }
-        public int? ProvincePk { get; set; }
-        public string? PartyName { get; set; }
-        public int? RegisteredVoters { get; set; }
-        public int? SpoiltVotes { get; set; }
-        public string? VotingDistrictId { get; set; }
-        
-        public virtual string? GetBallotType() { return null; }
-        public virtual string? GetWardId() { return null; }
-        public virtual int? GetTotalVotes() { return null; }
-        
-        public Ballot AsBallot(Action<Ballot>? oninit = null) 
-        {
-            Ballot ballot = GenerateBallot();
-
-            oninit?.Invoke(ballot);
-
-            return ballot;
-        }
-
-        protected virtual Ballot GenerateBallot()
-        {
-            return new Ballot
-            {
-                PkElectoralEvent = ElectoralEventPk,
-                PkProvince = ProvincePk,
-
-                VotersRegistered = RegisteredVoters,
-                VotesSpoilt = SpoiltVotes,
-            };
-        }
-
         public static class Utils
         {
             public static string? Clean(string text)
@@ -173,16 +124,16 @@ namespace Database.IEC.Inputs.CSVs
                 {
                     true when row.Contains("1994") => true switch
                     {
-                        true when row.Contains(ElectoralEvent.Types.National, StringComparison.OrdinalIgnoreCase) => 1,
-                        true when row.Contains(ElectoralEvent.Types.Provincial, StringComparison.OrdinalIgnoreCase) => 2,
+                        true when row.Contains(XycloneDesigns.Apis.IEC.Tables.ElectoralEvent.Types.National, StringComparison.OrdinalIgnoreCase) => 1,
+                        true when row.Contains(XycloneDesigns.Apis.IEC.Tables.ElectoralEvent.Types.Provincial, StringComparison.OrdinalIgnoreCase) => 2,
 
                         _ => throw new Exception("1994 ElectoralEvent with no type")
                     },
 
                     true when row.Contains("1999") => true switch
                     {
-                        true when row.Contains(ElectoralEvent.Types.National, StringComparison.OrdinalIgnoreCase) => 3,
-                        true when row.Contains(ElectoralEvent.Types.Provincial, StringComparison.OrdinalIgnoreCase) => 4,
+                        true when row.Contains(XycloneDesigns.Apis.IEC.Tables.ElectoralEvent.Types.National, StringComparison.OrdinalIgnoreCase) => 3,
+                        true when row.Contains(XycloneDesigns.Apis.IEC.Tables.ElectoralEvent.Types.Provincial, StringComparison.OrdinalIgnoreCase) => 4,
 
                         _ => throw new Exception("1999 ElectoralEvent with no type")
                     },
@@ -191,8 +142,8 @@ namespace Database.IEC.Inputs.CSVs
 
                     true when row.Contains("2004") => true switch
                     {
-                        true when row.Contains(ElectoralEvent.Types.National, StringComparison.OrdinalIgnoreCase) => 6,
-                        true when row.Contains(ElectoralEvent.Types.Provincial, StringComparison.OrdinalIgnoreCase) => 7,
+                        true when row.Contains(XycloneDesigns.Apis.IEC.Tables.ElectoralEvent.Types.National, StringComparison.OrdinalIgnoreCase) => 6,
+                        true when row.Contains(XycloneDesigns.Apis.IEC.Tables.ElectoralEvent.Types.Provincial, StringComparison.OrdinalIgnoreCase) => 7,
 
                         _ => throw new Exception("2004 ElectoralEvent with no type")
                     },
@@ -201,8 +152,8 @@ namespace Database.IEC.Inputs.CSVs
 
                     true when row.Contains("2009") => true switch
                     {
-                        true when row.Contains(ElectoralEvent.Types.National, StringComparison.OrdinalIgnoreCase) => 9,
-                        true when row.Contains(ElectoralEvent.Types.Provincial, StringComparison.OrdinalIgnoreCase) => 10,
+                        true when row.Contains(XycloneDesigns.Apis.IEC.Tables.ElectoralEvent.Types.National, StringComparison.OrdinalIgnoreCase) => 9,
+                        true when row.Contains(XycloneDesigns.Apis.IEC.Tables.ElectoralEvent.Types.Provincial, StringComparison.OrdinalIgnoreCase) => 10,
 
                         _ => throw new Exception("2009 ElectoralEvent with no type")
                     },
@@ -211,8 +162,8 @@ namespace Database.IEC.Inputs.CSVs
 
                     true when row.Contains("2014") => true switch
                     {
-                        true when row.Contains(ElectoralEvent.Types.National, StringComparison.OrdinalIgnoreCase) => 12,
-                        true when row.Contains(ElectoralEvent.Types.Provincial, StringComparison.OrdinalIgnoreCase) => 13,
+                        true when row.Contains(XycloneDesigns.Apis.IEC.Tables.ElectoralEvent.Types.National, StringComparison.OrdinalIgnoreCase) => 12,
+                        true when row.Contains(XycloneDesigns.Apis.IEC.Tables.ElectoralEvent.Types.Provincial, StringComparison.OrdinalIgnoreCase) => 13,
 
                         _ => throw new Exception("2014 ElectoralEvent with no type")
                     },
@@ -221,8 +172,8 @@ namespace Database.IEC.Inputs.CSVs
 
                     true when row.Contains("2019") => true switch
                     {
-                        true when row.Contains(ElectoralEvent.Types.National, StringComparison.OrdinalIgnoreCase) => 15,
-                        true when row.Contains(ElectoralEvent.Types.Provincial, StringComparison.OrdinalIgnoreCase) => 16,
+                        true when row.Contains(XycloneDesigns.Apis.IEC.Tables.ElectoralEvent.Types.National, StringComparison.OrdinalIgnoreCase) => 15,
+                        true when row.Contains(XycloneDesigns.Apis.IEC.Tables.ElectoralEvent.Types.Provincial, StringComparison.OrdinalIgnoreCase) => 16,
 
                         _ => throw new Exception("2019 ElectoralEvent with no type")
                     },
@@ -231,9 +182,9 @@ namespace Database.IEC.Inputs.CSVs
 
                     true when row.Contains("2024") => true switch
                     {
-                        true when row.Contains(ElectoralEvent.Types.National, StringComparison.OrdinalIgnoreCase) => 18,
-                        true when row.Contains(ElectoralEvent.Types.Provincial, StringComparison.OrdinalIgnoreCase) => 19,
-                        true when row.Contains(ElectoralEvent.Types.Regional, StringComparison.OrdinalIgnoreCase) => 20,
+                        true when row.Contains(XycloneDesigns.Apis.IEC.Tables.ElectoralEvent.Types.National, StringComparison.OrdinalIgnoreCase) => 18,
+                        true when row.Contains(XycloneDesigns.Apis.IEC.Tables.ElectoralEvent.Types.Provincial, StringComparison.OrdinalIgnoreCase) => 19,
+                        true when row.Contains(XycloneDesigns.Apis.IEC.Tables.ElectoralEvent.Types.Regional, StringComparison.OrdinalIgnoreCase) => 20,
 
                         _ => throw new Exception("2024 ElectoralEvent with no type")
                     },

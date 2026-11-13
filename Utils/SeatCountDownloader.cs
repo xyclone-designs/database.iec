@@ -1,4 +1,4 @@
-﻿using Database.IEC.Inputs.CSVs;
+﻿using Database.IEC.Inputs;
 
 using System;
 using System.Collections.Generic;
@@ -1174,7 +1174,7 @@ namespace Database.IEC.Utils
 						5 => "NP",
 						9 => "WP",
 
-						_ => CSVRow.Utils.ProvincePkToId(pk)
+						_ => CSV.Utils.ProvincePkToId(pk)
 					};
 
 					string file = string.Format("{0}_{1}.xls", urivalue.prefix, municipality);

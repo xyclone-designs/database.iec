@@ -1,4 +1,4 @@
-﻿using Database.IEC.Inputs.CSVs;
+﻿using Database.IEC.Inputs;
 
 using System;
 using System.Collections.Generic;
@@ -12,14 +12,14 @@ namespace SQLite
 {
     public static class SQLiteConnectionExtensions
     {
-		public static void CSVNew<TCSVRow>(this SQLiteConnection sqliteConnection, StreamWriter? log, IEnumerable<TCSVRow> rows) where TCSVRow : CSVRow
+		public static void CSVNew<TCSVRow>(this SQLiteConnection sqliteConnection, StreamWriter? log, IEnumerable<TCSVRow> rows) where TCSVRow : CSV.Row
 		{
 			CSVNewParties(sqliteConnection, log, rows);
 			CSVNewMunicipalities(sqliteConnection, log, rows);
 			CSVNewVotingDistricts(sqliteConnection, log, rows);
 			CSVNewWards(sqliteConnection, log, rows);
 		}
-		public static List<Party> CSVNewParties<TCSVRow>(this SQLiteConnection sqliteConnection, StreamWriter? log, IEnumerable<TCSVRow> rows) where TCSVRow : CSVRow
+		public static List<Party> CSVNewParties<TCSVRow>(this SQLiteConnection sqliteConnection, StreamWriter? log, IEnumerable<TCSVRow> rows) where TCSVRow : CSV.Row
 		{
 			Console.WriteLine("Parties");
 			Console.WriteLine("Parties - Retrieving...");
@@ -52,7 +52,7 @@ namespace SQLite
 
 			return parties;
 		}
-		public static List<Municipality> CSVNewMunicipalities<TCSVRow>(this SQLiteConnection sqliteConnection, StreamWriter? log, IEnumerable<TCSVRow> rows) where TCSVRow : CSVRow
+		public static List<Municipality> CSVNewMunicipalities<TCSVRow>(this SQLiteConnection sqliteConnection, StreamWriter? log, IEnumerable<TCSVRow> rows) where TCSVRow : CSV.Row
 		{
 			Console.WriteLine("Municipalities");
 			Console.WriteLine("Municipalities - Retrieving...");
@@ -71,7 +71,7 @@ namespace SQLite
 			{
 				Console.WriteLine("Municipalities - Inserting... [{0} - {1}] / {2}", lower, upper, _rows.Count);
 				List<Municipality> municipalities_new = 
-					(typeof(TCSVRow) == typeof(NPE1999)
+					(typeof(TCSVRow) == typeof(CSV.NPE._1999)
 						? _rows[lower..upper].Where(row => _municipalities.Any(municipality => string.Equals(row.MunicipalityName, municipality.Name, StringComparison.OrdinalIgnoreCase)) is false)
 						: _rows[lower..upper].Where(row =>
 						{
@@ -110,7 +110,7 @@ namespace SQLite
 
 			return municipalities;
 		}
-		public static List<VotingDistrict> CSVNewVotingDistricts<TCSVRow>(this SQLiteConnection sqliteConnection, StreamWriter? log, IEnumerable<TCSVRow> rows) where TCSVRow : CSVRow
+		public static List<VotingDistrict> CSVNewVotingDistricts<TCSVRow>(this SQLiteConnection sqliteConnection, StreamWriter? log, IEnumerable<TCSVRow> rows) where TCSVRow : CSV.Row
 		{
 			Console.WriteLine("VotingDistricts");
 			Console.WriteLine("VotingDistricts - Retrieving...");
@@ -137,15 +137,15 @@ namespace SQLite
 
 			return votingdistricts;
 		}
-		public static List<Ward> CSVNewWards<TCSVRow>(this SQLiteConnection sqliteConnection, StreamWriter? log, IEnumerable<TCSVRow> rows) where TCSVRow : CSVRow
+		public static List<Ward> CSVNewWards<TCSVRow>(this SQLiteConnection sqliteConnection, StreamWriter? log, IEnumerable<TCSVRow> rows) where TCSVRow : CSV.Row
 		{
 			Console.WriteLine("Wards");
 			Console.WriteLine("Wards - Retrieving...");
 			List<Ward> wards = rows
 				.Select(row => true switch
 				{
-					true when row is CSVRowLGE csvrowlge => csvrowlge.WardId,
-					true when row is CSVRowNPE2 csvrownpe2 => csvrownpe2.WardId,
+					true when row is CSV.RowLGE csvrowlge => csvrowlge.WardId,
+					true when row is CSV.RowNPE2 csvrownpe2 => csvrownpe2.WardId,
 
 					_ => null
 
@@ -215,7 +215,7 @@ namespace SQLite
 			if (party is null)
 			{
 				Console.WriteLine("Party Not  {0}", partyName);
-				//streamWriterErrors?.WriteLine("\"{0}\" => \"{1}\",", partyName, Titlelise(partyName));
+				// streamWriterErrors?.WriteLine("\"{0}\" => \"{1}\",", partyName, Titlelise(partyName));
 			}
 			else Console.WriteLine("Party {0}", partyName);
 
